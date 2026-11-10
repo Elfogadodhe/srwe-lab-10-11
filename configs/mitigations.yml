@@ -1,0 +1,256 @@
+# ------------------------------------------------------------------
+# 1-2. MAC flooding + MAC spoofing -> PORT SECURITY
+# ------------------------------------------------------------------
+port-security:
+  S1:
+    interfaces:
+      FastEthernet0/1:
+        - switchport port-security
+        - switchport port-security maximum 2
+        - switchport port-security mac-address sticky
+        - switchport port-security violation restrict
+      FastEthernet0/3:                              # ATTACKER portja
+        - switchport port-security
+        - switchport port-security maximum 1
+        - switchport port-security violation shutdown
+    post:
+      - show port-security interface fa0/1
+      - show port-security interface fa0/3
+  S2:
+    interfaces:
+      FastEthernet0/1:
+        - switchport port-security
+        - switchport port-security maximum 2
+        - switchport port-security mac-address sticky
+        - switchport port-security violation restrict
+
+# ------------------------------------------------------------------
+# 3-4. DHCP starvation + spoofing -> DHCP SNOOPING
+# ------------------------------------------------------------------
+dhcp-snooping:
+  S1:
+    global:
+      - ip dhcp snooping
+      - ip dhcp snooping vlan 10
+      - no ip dhcp snooping information option   # router-on-a-stick kompatibilitás
+    interfaces:
+      GigabitEthernet0/1:                         # DHCP szerver (R1) felé — TRUSTED
+        - ip dhcp snooping trust
+      FastEthernet0/24:                           # S2 felé — TRUSTED
+        - ip dhcp snooping trust
+      FastEthernet0/3:                            # ATTACKER — untrusted + rate limit
+        - ip dhcp snooping limit rate 5
+    post:
+      - show ip dhcp snooping
+      - show ip dhcp snooping binding
+  S2:
+    global:
+      - ip dhcp snooping
+      - ip dhcp snooping vlan 10
+      - no ip dhcp snooping information option
+    interfaces:
+      FastEthernet0/24:
+        - ip dhcp snooping trust
+    post:
+      - show ip dhcp snooping
+
+# ------------------------------------------------------------------
+# 5. ARP poisoning -> DYNAMIC ARP INSPECTION
+# ------------------------------------------------------------------
+dai:
+  S1:
+    global:
+      - ip arp inspection vlan 10
+    interfaces:
+      FastEthernet0/24:                           # trunk S2 felé — trust
+        - ip arp inspection trust
+      FastEthernet0/1:
+        - ip arp inspection limit rate 15
+      FastEthernet0/3:
+        - ip arp inspection limit rate 15
+    post:
+      - show ip arp inspection
+      - show ip arp inspection statistics vlan 10
+  S2:
+    global:
+      - ip arp inspection vlan 10
+    interfaces:
+      FastEthernet0/24:
+        - ip arp inspection trust
+    post:
+      - show ip arp inspection
+
+# ------------------------------------------------------------------
+# 6. STP manipuláció -> BPDU GUARD + ROOT GUARD
+# ------------------------------------------------------------------
+stp-guard:
+  S1:
+    global:
+      - spanning-tree vlan 10 root primary
+    interfaces:
+      FastEthernet0/1:
+        - spanning-tree bpduguard enable
+      FastEthernet0/3:
+        - spanning-tree bpduguard enable
+        - spanning-tree guard root
+    post:
+      - show spanning-tree summary
+      - show spanning-tree inconsistentports
+  S2:
+    global:
+      - spanning-tree vlan 10 root secondary
+    interfaces:
+      FastEthernet0/1:
+        - spanning-tree bpduguard enable
+
+# ------------------------------------------------------------------
+# 7. VLAN hopping (DTP) -> DTP TILTÁSA + nem használt portok lezárása
+# ------------------------------------------------------------------
+vlan-hop:
+  S1:
+    global:
+      - no cdp run
+    interfaces:
+      FastEthernet0/1:
+        - switchport nonegotiate
+        - switchport mode access
+        - switchport access vlan 10
+      FastEthernet0/3:
+        - switchport nonegotiate
+        - switchport mode access
+        - switchport access vlan 10
+      FastEthernet0/24:
+        - switchport nonegotiate
+      range Fa0/4 - 23:
+        - shutdown
+        - switchport mode access
+        - switchport access vlan 999
+  S2:
+    global:
+      - no cdp run
+    interfaces:
+      FastEthernet0/1:
+        - switchport nonegotiate
+        - switchport mode access
+      range Fa0/2 - 23:
+        - shutdown
+        - switchport access vlan 999
+
+# ------------------------------------------------------------------
+# 8. CDP felderítés + Telnet -> SWITCH HARDENING
+# ------------------------------------------------------------------
+hardening:
+  S1:
+    global:
+      - no cdp run
+      - no ip http server
+      - service password-encryption
+      - enable secret cisco123
+      - ip ssh version 2
+      - line console 0
+      - password conpass
+      - login
+      - exit
+      - line vty 0 4
+      - transport input ssh
+      - login local
+      - exec-timeout 5 0
+      - exit
+    post:
+      - show cdp
+      - show ip ssh
+  S2:
+    global:
+      - no cdp run
+      - ip ssh version 2
+      - line vty 0 4
+      - transport input ssh
+      - login local
+      - exit
+
+# ------------------------------------------------------------------
+# 9. Double-tagging -> NATIV VLAN HARDENING + PRUNING
+# ------------------------------------------------------------------
+native-vlan-hardening:
+  S1:
+    global:
+      - vlan 999
+      - name NATIVE_BLACKHOLE
+      - exit
+    interfaces:
+      FastEthernet0/24:
+        - switchport mode trunk
+        - switchport trunk native vlan 999
+        - switchport trunk allowed vlan 10,20,99
+    post:
+      - show interfaces trunk
+  S2:
+    interfaces:
+      FastEthernet0/24:
+        - switchport mode trunk
+        - switchport trunk native vlan 999
+        - switchport trunk allowed vlan 10,20,99
+    post:
+      - show interfaces trunk
+
+# ------------------------------------------------------------------
+# 10. IP spoofing -> IP SOURCE GUARD (kötelezően a dhcp-snooping UTÁN!)
+# ------------------------------------------------------------------
+ip-source-guard:
+  S1:
+    interfaces:
+      FastEthernet0/1:
+        - ip verify source
+      FastEthernet0/3:
+        - ip verify source
+        - switchport port-security
+        - switchport port-security maximum 1
+    post:
+      - show ip verify source
+      - show ip source binding
+  S2:
+    interfaces:
+      FastEthernet0/1:
+        - ip verify source
+    post:
+      - show ip verify source
+
+# ------------------------------------------------------------------
+# 11. LLDP felderítés -> LLDP TILTÁSA USER-PORTOKON
+# Megjegyzés: platformfüggő — egyes IOS-buildeken csak globális
+# 'no lldp run' létezik. Első alkalommal teszteld a saját IOS-odon!
+# ------------------------------------------------------------------
+lldp-hardening:
+  S1:
+    interfaces:
+      FastEthernet0/1:
+        - no lldp transmit
+        - no lldp receive
+      FastEthernet0/3:
+        - no lldp transmit
+        - no lldp receive
+    post:
+      - show lldp interface FastEthernet0/1
+      - show lldp neighbors
+  S2:
+    interfaces:
+      FastEthernet0/1:
+        - no lldp transmit
+        - no lldp receive
+    post:
+      - show lldp interface FastEthernet0/1
+
+# ------------------------------------------------------------------
+# 12. ICMP-redirect MITM -> REDIRECT TILTÁSA A ROUTEREN
+# ------------------------------------------------------------------
+icmp-redirect:
+  R1:
+    interfaces:
+      GigabitEthernet0/1.10:
+        - no ip redirects
+      GigabitEthernet0/1.20:
+        - no ip redirects
+      GigabitEthernet0/1.99:
+        - no ip redirects
+    post:
+      - show ip interface GigabitEthernet0/1.10 | include redirects

@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 """verify.py — Automatizált védelem-ellenőrző a SRWE 10–11 laborhoz.
 
-27 ellenőrzés mind a 12 támadás ellen, pontszámmal és jegykalkulációval.
+27 ellenőrzés mind a 12 támadás ellen. A szkript NEM ad jegyet és NEM
+pontoz — csak leellenőrzi, hogy minden védelmi beállítás a helyén van-e,
+és felsorolja, melyik ellenőrzés ment át (Pipa) és melyik nem (Hiba).
 
 Használat:
-    python3 verify.py inventory.yml                # ellenőrzés + pontszám
+    python3 verify.py inventory.yml               # ellenőrzés
     python3 verify.py inventory.yml --verbose     # nyers kimenetekkel
     python3 verify.py inventory.yml --json out.json
     python3 verify.py inventory.yml --only S1     # csak egy eszköz
 
 Függőségek: pip install netmiko pyyaml
-Kilépési kód: 0 ha >= 60%, 1 ha alatta (CI-barát)
+Kilépési kód: 0 ha minden (elérhető eszközön futtatott) ellenőrzés átment,
+1 ha legalább egy megbukott (CI-barát).
 """
 import argparse
 import json
@@ -281,9 +284,6 @@ CHECKS = [
     },
 ]
 
-MAX_POINTS = sum(c["points"] for c in CHECKS)
-
-
 # ============================================================================
 # MOTOR
 # ============================================================================
@@ -339,7 +339,7 @@ def main():
     print("=" * 78)
     print(" SRWE 10-11 LABOR — AUTOMATIZÁLT VÉDELEM-ELLENŐRZÉS")
     print(f" Időpont: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
-          f" | Elérhető pont: {MAX_POINTS}")
+          f" | Ellenőrzések száma: {len(CHECKS)}")
     print("=" * 78)
 
     conns = {}
@@ -353,22 +353,19 @@ def main():
         else:
             print(f"[!] {name}: NEM ELÉRHETŐ — {err}")
 
-    results, earned = [], 0
+    results = []
     print("-" * 78)
-    print(f"{'ID':<32}{'Pont':>5}  {'Eredmény':<8} Részletek")
+    print(f"{'ID':<38}{'Eredmény':<8} Részletek")
     print("-" * 78)
 
     for check in CHECKS:
         dev = check["device"]
         if dev not in conns:
-            print(f"{check['id']:<32}{check['points']:>5}  {'SKIP':<8} eszköz nem elérhető")
+            print(f"{check['id']:<38}{'SKIP':<8} eszköz nem elérhető")
             results.append({**check, "passed": None, "details": "eszköz nem elérhető"})
             continue
         passed, details, output = run_check(conns[dev], check)
-        print(f"{check['id']:<32}{check['points']:>5}  "
-              f"{'Pipa' if passed else 'Hiba':<8} {details}")
-        if passed:
-            earned += check["points"]
+        print(f"{check['id']:<38}{'Pipa' if passed else 'Hiba':<8} {details}")
         if args.verbose:
             print(f"--- {check['cmd']} ---\n{output}\n")
         results.append({**check, "passed": passed, "details": details})
@@ -379,13 +376,15 @@ def main():
     # ------------------------------ ÖSSZESÍTÉS ------------------------------
     total = len([r for r in results if r["passed"] is not None])
     ok_cnt = len([r for r in results if r["passed"] is True])
-    pct = 100.0 * earned / MAX_POINTS if MAX_POINTS else 0
-    grade = (5 if pct >= 90 else 4 if pct >= 80 else 3 if pct >= 70
-             else 2 if pct >= 60 else 1)
+    fail_cnt = len([r for r in results if r["passed"] is False])
+    skip_cnt = len([r for r in results if r["passed"] is None])
     print("-" * 78)
-    print(f" Elért pont: {earned} / {MAX_POINTS}  ({pct:.1f}%)")
-    print(f" Átment ellenőrzések: {ok_cnt} / {total}")
-    print(f" Vélhető jegy: {grade}")
+    print(f" Átment ellenőrzések: {ok_cnt} / {total}"
+          f"   (Hiba: {fail_cnt}, Kihagyva: {skip_cnt})")
+    if fail_cnt == 0 and total > 0:
+        print(" Eredmény: MINDEN ellenőrzött védelem a helyén van.")
+    elif fail_cnt > 0:
+        print(" Eredmény: van hiányzó/hibás védelmi beállítás — lásd a 'Hiba' sorokat.")
     print("=" * 78)
 
     print("\n Támadásonkénti fedettség:")
@@ -403,16 +402,16 @@ def main():
         with open(args.json, "w") as f:
             json.dump({
                 "timestamp": datetime.now().isoformat(),
-                "score": {"earned": earned, "max": MAX_POINTS,
-                          "percent": round(pct, 1), "grade": grade},
+                "summary": {"checks_total": total, "passed": ok_cnt,
+                            "failed": fail_cnt, "skipped": skip_cnt},
                 "results": [{"id": r["id"], "device": r["device"], "cmd": r["cmd"],
-                             "attack": r["attack"], "points": r["points"],
+                             "attack": r["attack"],
                              "passed": r["passed"], "details": r["details"]}
                             for r in results],
             }, f, indent=2, ensure_ascii=False)
         print(f"\n[+] JSON mentve: {args.json}")
 
-    sys.exit(0 if pct >= 60 else 1)
+    sys.exit(0 if fail_cnt == 0 else 1)
 
 
 if __name__ == "__main__":

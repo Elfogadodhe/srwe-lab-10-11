@@ -1,0 +1,26 @@
+devices:
+  S1:
+    device_type: cisco_ios
+    host: 10.0.99.1
+    username: admin
+    password: "cisco123"
+    secret: "cisco123"
+  S2:
+    device_type: cisco_ios
+    host: 10.0.99.2
+    username: admin
+    password: "cisco123"
+    secret: "cisco123"
+  R1:
+    device_type: cisco_ios
+    host: 10.0.99.254
+    username: admin
+    password: "cisco123"
+    secret: "cisco123"
+
+management_vlan: 99
+user_vlan: 10
+test_vlan: 20
+user_subnet: 10.10.10.0/24
+legit_gateway: 10.10.10.1
+legit_dhcp: 10.10.10.1

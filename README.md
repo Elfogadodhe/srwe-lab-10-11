@@ -15,7 +15,13 @@ A labor **12 Layer 2 támadást** és a hozzájuk tartozó Cisco-védelmet járj
 | `docs/reflexios-lap.md` | Reflexiós és adatvédelmi lap (MITM / HTTP / HTTPS / DNS / DoH elemzés, GDPR) |
 | `docs/index-es-deploy-checklist.md` | Deployment checklist + oktatói megoldókulcs |
 | `docs/AI-instrukcio-es-vegso-audit.md` | AI-instrukció + audit protokoll (a csomag „source of truth"-ja, bővítési roadmap) |
-| `verify.py` | Automatizált ellenőrzés: 27 regex-ellenőrzés, 150 pont, pontszám + jegy + JSON-kimenet |
+| `requirements.txt` | Python-függőségek (netmiko, pyyaml, scapy) — `pip install -r requirements.txt` |
+| `inventory.yml` | Eszközleltár (IP, hitelesítés) a `push_config.py`-hoz |
+| `configs/baseline.yml` | Kiinduló (sebezhető) eszközbeállítások |
+| `configs/mitigations.yml` | Védelmi beállítások fázisonként (szekciókra bontva) |
+| `push_config.py` | Beállításokat tölt az eszközökre a YAML-ekből (netmiko) |
+| `attacker/` | A 12 támadó szkript (scapy) — a Linux ATTACKER gépen fut |
+| `verify.py` | Ellenőrző szkript: 27 regex-ellenőrzés + JSON-kimenet. **Nem ad jegyet és nem pontoz** — csak megnézi, hogy minden védelem a helyén van-e (Pipa/Hiba). |
 
 ## A 12 fázis
 

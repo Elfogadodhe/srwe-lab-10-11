@@ -1,0 +1,12 @@
+# SRWE Modul 10-11 labor - Python csomagok
+# Telepites (aktivalt venv-ben):  pip install -r requirements.txt
+#
+# Ez a fajl mindharom szerep csomagjat tartalmazza, igy barmelyik gepen
+# (admin / tamado) eleg egyetlen parancsot futtatni. Ha kulon-kulon
+# szeretnel telepiteni:
+#   - PC-A (admin):  netmiko, pyyaml
+#   - ATTACKER:      scapy
+
+netmiko>=4.0
+pyyaml>=6.0
+scapy>=2.5
