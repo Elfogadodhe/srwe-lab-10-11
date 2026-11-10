@@ -8,8 +8,9 @@ A labor **12 Layer 2 támadást** és a hozzájuk tartozó Cisco-védelmet járj
 
 | Útvonal | Tartalom |
 |---|---|
-| `docs/vegigvezetes-labor-felallitas.md` | **Kezdd itt:** végigvezetés — mit mire használunk, hogyan állítsuk fel és csináljuk végig a labort |
-| `docs/mester-labor-dokumentacio.md` | Mester dokumentáció: topológia, YAML-ek, push/verify szkriptek, 12 fázis menete |
+| `docs/srwe-labor-konyv.md` | **Kezdd itt:** a teljes labor egyetlen könyvben — a Python/venv/VSCode környezet felállításától nulláról, az összes fájlon át, a 12 támadás lépésről lépésre, másolható parancsokkal. Pythonhoz nem kell előismeret. |
+| `docs/vegigvezetes-labor-felallitas.md` | Rövidebb végigvezetés (karmesterlap) — a `srwe-labor-konyv.md` ennek és a mester dokumentációnak az összevont, részletes változata |
+| `docs/mester-labor-dokumentacio.md` | Mester dokumentáció (referencia): topológia, YAML-ek, push/verify szkriptek, 12 fázis menete |
 | `docs/hallgatoi-feladatlap.md` | Hallgatói munkalap (12 fázis, kitöltendő) |
 | `docs/reflexios-lap.md` | Reflexiós és adatvédelmi lap (MITM / HTTP / HTTPS / DNS / DoH elemzés, GDPR) |
 | `docs/index-es-deploy-checklist.md` | Deployment checklist + oktatói megoldókulcs |

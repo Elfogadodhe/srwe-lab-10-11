@@ -1,6 +1,6 @@
 # AI-Instrukció: SRWE M10–11 Laborfeladat Automatizált Előállítása
 
-*Dokumentum-verzió: v2.3 | Utolsó frissítés: 2026-11-10*
+*Dokumentum-verzió: v2.4 | Utolsó frissítés: 2026-11-10*
 
 ## RÉSZ 0 — KIEGÉSZÍTŐ TÁMADÁSI JAVASLATOK (bővítési roadmap)
 
@@ -335,7 +335,7 @@ Oktatási célra, izolált laborban használható; a 3.3 nyitott pontok béta-te
 
 ---
 
-*Dokumentum-verzió: v2.3 | Utolsó frissítés: 2026-11-10 | Audit módszer: az 1.2-2.7-es szempontok szerinti manuális revízió*
+*Dokumentum-verzió: v2.4 | Utolsó frissítés: 2026-11-10 | Audit módszer: az 1.2-2.7-es szempontok szerinti manuális revízió*
 
 ---
 
@@ -343,6 +343,7 @@ Oktatási célra, izolált laborban használható; a 3.3 nyitott pontok béta-te
 
 > Munkamenetre vonatkozó változásnapló. Minden módosítás timestamp-pel (ÉÉÉÉ-HH-NN).
 
+- **2026-11-10:** Összevont könyv hozzáadva: `docs/srwe-labor-konyv.md` — a `vegigvezetes-labor-felallitas.md` és a `mester-labor-dokumentacio.md` egyetlen, lépésről lépésre követhető kézikönyvbe vonva, könyvstruktúrában (I–V. rész, 28 fejezet). Pythonhoz nem feltételez előismeretet: teljes **venv + VSCode** környezetfelállítás nulláról (Windows/macOS/Linux), minden parancs közvetlenül másolható. A README belépési pontja erre mutat; a két forrásdokumentum változatlanul megmarad referenciaként. Instrukció v2.4-re frissítve.
 - **2026-11-10:** Új végigvezető kézikönyv hozzáadva: `docs/vegigvezetes-labor-felallitas.md` — mit mire használunk, a labor felállítása (hardver, topológia, szoftver, baseline) és a 12 fázis végigjátszása, pontozás, visszaállítás, hibakeresési gyorslista. A README is hivatkozik rá belépési pontként. Instrukció v2.3-ra frissítve.
 - **2026-11-10:** Sallang-eltávolítás az öt markdown dokumentumban — önfényező/motivációs zárlatok és töltelékmondatok törlése, a §3.4 Ítélet tömörítése; minden táblázat, parancs, YAML, kérdés és kitöltendő mező érintetlen. Instrukció v2.2-re frissítve.
   - Index: záró „Jó tanulást!" motivációs bekezdés törölve.
