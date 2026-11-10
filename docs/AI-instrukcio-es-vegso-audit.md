@@ -1,6 +1,6 @@
 # AI-Instrukció: SRWE M10–11 Laborfeladat Automatizált Előállítása
 
-*Dokumentum-verzió: v2.2 | Utolsó frissítés: 2026-11-10*
+*Dokumentum-verzió: v2.3 | Utolsó frissítés: 2026-11-10*
 
 ## RÉSZ 0 — KIEGÉSZÍTŐ TÁMADÁSI JAVASLATOK (bővítési roadmap)
 
@@ -335,7 +335,7 @@ Oktatási célra, izolált laborban használható; a 3.3 nyitott pontok béta-te
 
 ---
 
-*Dokumentum-verzió: v2.2 | Utolsó frissítés: 2026-11-10 | Audit módszer: az 1.2-2.7-es szempontok szerinti manuális revízió*
+*Dokumentum-verzió: v2.3 | Utolsó frissítés: 2026-11-10 | Audit módszer: az 1.2-2.7-es szempontok szerinti manuális revízió*
 
 ---
 
@@ -343,11 +343,12 @@ Oktatási célra, izolált laborban használható; a 3.3 nyitott pontok béta-te
 
 > Munkamenetre vonatkozó változásnapló. Minden módosítás timestamp-pel (ÉÉÉÉ-HH-NN).
 
+- **2026-11-10:** Új végigvezető kézikönyv hozzáadva: `docs/vegigvezetes-labor-felallitas.md` — mit mire használunk, a labor felállítása (hardver, topológia, szoftver, baseline) és a 12 fázis végigjátszása, pontozás, visszaállítás, hibakeresési gyorslista. A README is hivatkozik rá belépési pontként. Instrukció v2.3-ra frissítve.
 - **2026-11-10:** Sallang-eltávolítás az öt markdown dokumentumban — önfényező/motivációs zárlatok és töltelékmondatok törlése, a §3.4 Ítélet tömörítése; minden táblázat, parancs, YAML, kérdés és kitöltendő mező érintetlen. Instrukció v2.2-re frissítve.
   - Index: záró „Jó tanulást!" motivációs bekezdés törölve.
   - AI-instrukció: §3.4 Ítélet terjengős prózája egy mondatra húzva; a PROTOCOL-bevezető töltelékmondata törölve.
   - Reflexiós lap: „Ez a lap magja." töltelékmondat törölve.
-  - A munka innentől a privát GitHub repóban (`trefiGit/srwe-lab-10-11`) folytatódik — lásd a repo-hozzáférés beállítását.
+  - A munka innentől a privát GitHub repóban (`Elfogadodhe/srwe-lab-10-11`) folytatódik.
 - **2026-11-10:** Kiegészítő támadási javaslatok (## RÉSZ 0) hozzáadva; instrukció v2.1-re frissítve.
   - Új, a jelenlegi 12 fázisban NEM szereplő Layer 2 / L2+ támadások értékelő táblázata (12 tétel, 8 oszlop: #, Támadás neve, Réteg, Eszközök, Cisco IOS mitigation, mitigations.yml szekció, Nehézség 1–5, Prioritás 1–12).
   - Ajánlott felvételi sorrend a következő 13–16. fázisra (HSRP eltérítés, IPv6 RA spoofing, DHCPv6 starvation/spoofing, VTP injection) indoklással és sorrendfüggőséggel.

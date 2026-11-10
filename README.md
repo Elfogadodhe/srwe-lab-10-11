@@ -8,6 +8,7 @@ A labor **12 Layer 2 támadást** és a hozzájuk tartozó Cisco-védelmet járj
 
 | Útvonal | Tartalom |
 |---|---|
+| `docs/vegigvezetes-labor-felallitas.md` | **Kezdd itt:** végigvezetés — mit mire használunk, hogyan állítsuk fel és csináljuk végig a labort |
 | `docs/mester-labor-dokumentacio.md` | Mester dokumentáció: topológia, YAML-ek, push/verify szkriptek, 12 fázis menete |
 | `docs/hallgatoi-feladatlap.md` | Hallgatói munkalap (12 fázis, kitöltendő) |
 | `docs/reflexios-lap.md` | Reflexiós és adatvédelmi lap (MITM / HTTP / HTTPS / DNS / DoH elemzés, GDPR) |
