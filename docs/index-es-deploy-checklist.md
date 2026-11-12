@@ -5,39 +5,39 @@
 
 ## Tartalomjegyzék
 
-| Sorszám | Dokumentum | Célközönség | Helye a canvason |
+| Sorszám | Dokumentum | Célközönség | Helye a repóban |
 |---|---|---|---|
-| 1 | **Mester labor dokumentum** (12 támadás + védelem) | Oktató, hallgató | `srwe-lab-tamadas-vedelem` |
-| 2 | **Hallgatói feladatlap** (12 fázis kitöltendő) | Hallgató | `srwe-lab-hallgatoi-feladatlap` |
-| 3 | **Reflexiós és adatvédelmi lap** (MITM/HTTP/HTTPS/DNS elemzés) | Hallgató | `srwe-reflexios-adatvedelmi-lap` |
-| 4 | **Végleges verify.py** (27 ellenőrzés, pontszám) | Oktató, hallgató | `verify-script-bovitett` |
-| 5 | **Baseline** (Telnet nyitva, sebezhető állapot) | Oktató | `srwe-lab-tamadas-vedelem` (5. fejezet) |
+| 1 | **Összevont labor könyv** (teljes labor egy könyvben, 12 támadás + védelem) | Oktató, hallgató | `docs/srwe-labor-konyv.md` |
+| 2 | **Hallgatói feladatlap** (12 fázis kitöltendő) | Hallgató | `docs/hallgatoi-feladatlap.md` |
+| 3 | **Reflexiós és adatvédelmi lap** (MITM/HTTP/HTTPS/DNS elemzés) | Hallgató | `docs/reflexios-lap.md` |
+| 4 | **verify.py** (27 ellenőrzés, Pipa/Hiba — nem ad jegyet) | Oktató, hallgató | `verify.py` (repó gyökér) |
+| 5 | **Baseline** (Telnet nyitva, sebezhető állapot) | Oktató | `configs/baseline.yml` |
 | 6 | **Deployment checklist + oktatói útmutató** (ez a fájl) | Oktató | **Ebben a fájlban** |
 
 ---
 
 ## 1. Gyorsstart — 15 perces előkészület
 
-### 1.1 Könyvtár létrehozása
+### 1.1 A repó beszerzése
+
+A repó **minden fájlt tartalmaz** — kézzel semmit nem kell létrehozni vagy bemásolni. Klónozd:
 
 ```bash
-mkdir srwe-lab-full
+git clone <repó-URL> srwe-lab-full
 cd srwe-lab-full
-mkdir attacker configs
 ```
 
-### 1.2 Fájlmentési listák (másold be)
+### 1.2 A repóban lévő fájlok
 
-**A)** Másold be a **Mester labor dokumentumból** (`srwe-lab-tamadas-vedelem`) ezeket a szekciókat:
+Már a repóban vannak, a helyükön:
 - `inventory.yml`
 - `configs/baseline.yml`
 - `configs/mitigations.yml`
 - `push_config.py`
 - `attacker/` mappa 12 scriptje (mac_flood.py, mac_spoof.py, dhcp_starve.py, rogue_dhcp.py, arp_spoof.py, stp_takeover.py, vlan_hop_recon.py, cdp_telnet_recon.py, vlan_double_tag.py, ip_spoof.py, lldp_recon.py, icmp_redirect.py)
+- `verify.py` (a repó gyökerében)
 
-**B)** Másold be a **verify.py végleges verziót** (`verify-script-bovitett`)
-
-**C)** **Fontos:** A `configs/baseline.yml` VTY szekcióját a Mester labor dokumentáció 5. fejezete szerint ellenőrizd — a következő soroknak kell szerepelniük:
+**Fontos:** A `configs/baseline.yml` VTY szekciójában a következő soroknak kell szerepelniük (sebezhető, de elérhető kiinduló állapot):
 ```yaml
 - line vty 0 4
 - transport input telnet ssh
@@ -150,7 +150,7 @@ ssh admin@10.0.99.1
 - [ ] R1-en DHCP pool konfigurálva (VLAN 10, 10.10.10.0/24)
 - [ ] PC-A (admin) IP-cím: 10.0.99.10/24, SSH elérhető
 - [ ] ATTACKER (Kali/Debian) root jog, scapy telepítve
-- [ ] **baseline.yml** feltöltve (Telnet nyitva — sebezhető kiinduló állapot, Mester 5. fejezet)
+- [ ] **baseline.yml** feltöltve (Telnet nyitva — sebezhető kiinduló állapot)
 - [ ] `verify.py` futási teszt (legalább S1-en)
 
 ### 4.2 Labor előtt 15 perc (hallgatók érkezése előtt)

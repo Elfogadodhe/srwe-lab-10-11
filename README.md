@@ -9,12 +9,10 @@ A labor **12 Layer 2 támadást** és a hozzájuk tartozó Cisco-védelmet járj
 | Útvonal | Tartalom |
 |---|---|
 | `docs/srwe-labor-konyv.md` | **Kezdd itt:** a teljes labor egyetlen könyvben — a Python/venv/VSCode környezet felállításától nulláról, az összes fájlon át, a 12 támadás lépésről lépésre, másolható parancsokkal. Pythonhoz nem kell előismeret. |
-| `docs/vegigvezetes-labor-felallitas.md` | Rövidebb végigvezetés (karmesterlap) — a `srwe-labor-konyv.md` ennek és a mester dokumentációnak az összevont, részletes változata |
-| `docs/mester-labor-dokumentacio.md` | Mester dokumentáció (referencia): topológia, YAML-ek, push/verify szkriptek, 12 fázis menete |
 | `docs/hallgatoi-feladatlap.md` | Hallgatói munkalap (12 fázis, kitöltendő) |
 | `docs/reflexios-lap.md` | Reflexiós és adatvédelmi lap (MITM / HTTP / HTTPS / DNS / DoH elemzés, GDPR) |
 | `docs/index-es-deploy-checklist.md` | Deployment checklist + oktatói megoldókulcs |
-| `docs/AI-instrukcio-es-vegso-audit.md` | AI-instrukció + audit protokoll (a csomag „source of truth"-ja, bővítési roadmap) |
+| `docs/AI-instrukcio.md` | AI-instrukció (reprodukciós instrukció + bővítési roadmap) |
 | `requirements.txt` | Python-függőségek (netmiko, pyyaml, scapy) — `pip install -r requirements.txt` |
 | `inventory.yml` | Eszközleltár (IP, hitelesítés) a `push_config.py`-hoz |
 | `configs/baseline.yml` | Kiinduló (sebezhető) eszközbeállítások |
@@ -38,7 +36,7 @@ A labor **12 Layer 2 támadást** és a hozzájuk tartozó Cisco-védelmet járj
 11. LLDP recon → `lldp-hardening`
 12. ICMP redirect (gateway MITM) → `icmp-redirect`
 
-A következő iterációk bővítési roadmapját (13–16. fázis: HSRP eltérítés, IPv6 RA spoofing, DHCPv6 starvation/spoofing, VTP injection) lásd: `docs/AI-instrukcio-es-vegso-audit.md`, RÉSZ 0.
+A következő iterációk bővítési roadmapját (13–16. fázis: HSRP eltérítés, IPv6 RA spoofing, DHCPv6 starvation/spoofing, VTP injection) lásd: `docs/AI-instrukcio.md`, RÉSZ 0.
 
 ## Biztonsági megkötés
 

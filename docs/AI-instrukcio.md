@@ -1,6 +1,6 @@
 # AI-Instrukció: SRWE M10–11 Laborfeladat Automatizált Előállítása
 
-*Dokumentum-verzió: v2.5 | Utolsó frissítés: 2026-11-10*
+*Dokumentum-verzió: v2.6 | Utolsó frissítés: 2026-11-12*
 
 ## RÉSZ 0 — KIEGÉSZÍTŐ TÁMADÁSI JAVASLATOK (bővítési roadmap)
 
@@ -172,9 +172,9 @@ if __name__ == "__main__":
 
 ---
 
-## Reprodukciós és ellenőrzési szempontok (PROTOCOL v2.0)
+## Reprodukciós szempontok
 
-> Cél: egy AI-asszisztens (vagy fejlesztő) a semmiből reprodukálja a teljes labort, majd a beépített ellenőrzőlista alapján visszaellenőrizze a saját munkáját.
+> Cél: egy AI-asszisztens (vagy fejlesztő) a semmiből reprodukálja a teljes labort az alábbi instrukció alapján.
 
 ---
 
@@ -225,7 +225,7 @@ srwe-lab/
 ├── configs/baseline.yml   (VÉDTelen, de elérhető állapot; ssh+TELNET, cdp be, ip redirects be)
 ├── configs/mitigations.yml (12 szekció, post-show-parancsokkal)
 ├── push_config.py         (netmiko YAML→Cisco pusher)
-├── verify.py              (27 regex-ellenőrzés, pontszám, jegy, JSON-kimenet)
+├── verify.py              (27 regex-ellenőrzés, Pipa/Hiba, JSON-kimenet — nem ad jegyet és nem pontoz)
 ├── attacker/*.py          (12 scapy szkript, mindegyik root-ként fut)
 ├── feladatlap.md          (hallgatói munkalap, 12 fázis kitöltendő)
 └── reflexios_lap.md       (protokoll/adatvédelmi reflexió, rubrikával)
@@ -235,107 +235,13 @@ srwe-lab/
 
 - **Attacker szkriptek:** scapy, `sudo`, sudóként futtathatók, véletlenszerű MAC-generálás, `[...] hogyan kell meghívni` docstringgel
 - **Pusher:** netmiko `ConnectHandler`, `send_config_set`, `save_config`; az `interface`/`interface range` kulcsok felismerése; a konténerparancsok (vlan, pool, line) után automatikus `exit`
-- **Verify:** show-parancs kimenet ellenőrzése reguláris kifejezésekkel; pozitív (KELL) és negatív (NEM SZABAD) minták; `--verbose`, `--json`, `--only` opciók; pontszám + jegy + exit kód
+- **Verify:** show-parancs kimenet ellenőrzése reguláris kifejezésekkel; pozitív (KELL) és negatív (NEM SZABAD) minták; `--verbose`, `--json`, `--only` opciók; Pipa/Hiba kimenet + exit kód (0, ha minden átment) — **nem ad jegyet és nem pontoz**
 - **Baseline követelmény:** sebezhető (nincs egy védelem sem), DE elérhető (SSH+Telnet menedzsmenten, CDP fut, `ip redirects` bekapcsolva)
 - **Reflexiós lap követelménye:** MITM-elemzés HTTP/HTTPS(SNI, stripping, rogue CA)/DNS(DNSSEC vs DoH/DoT)/SNMP/NTP és más protokollok felett; GDPR-elvpárosítás; dilemmakérdések (TLS-interceptió, DoH-központosítás)
 
 ---
 
-## RÉSZ 2 — ELLENŐRZÉSI PROTOKOLL (a generált anyag auditálásához)
-
-A generálás után az AI (vagy egy ember) a következő hét szempont szerint ellenőrizze a csomagot. Mindegyik pontnál jelezni kell: RENDBEN / HIBÁS.
-
-### 2.1 Fázislefedettség
-
-- [ ] Mind a 12 támadás szerepel (mátrix, menet, feladatlap, reflexiós lap)
-- [ ] A fázisszámok MINDEN doksiban azonos hivatkozásokra mutatnak (pl. „5. fázis = ARP poisoning" sehol sem „4. fázisként" szerepel)
-
-### 2.2 Kódkorrektség
-
-- [ ] Minden Python-szkript szintaktikailag érvényes (`python3 -m py_compile`)
-- [ ] Nincs nem definiált változó (gyakori hiba: f-stringből lemarad a definíció — pl. `yiaddr` vs `offer_ip` a rogue DHCP-ben)
-- [ ] Minden scapy-használat raw socketet igényel → minden attacker-szkript docstringje tartalmazza a `sudo` kötelezettséget
-- [ ] A pusher kezeli: `global`, `dhcp_pool`, `interfaces`, `range` kulcsokat és a `post` ellenőrzőket
-
-### 2.3 Baseline sebezhetőség
-
-- [ ] A baseline-ban NINCS védelem: port-security, snooping, DAI, guard-ok, IPSG, LLDP-tiltas — egy sem
-- [ ] A baseline-ban VAN: CDP fut, `ip redirects` bekapcsolva, natív VLAN = 1 (default), **és a vty sorokon `transport input telnet ssh`** (különben a 8. fázis félresikerül)
-- [ ] Az eszközök menedzsment VLAN-on (99) elérhetők SSH-n
-
-### 2.4 YAML-konzisztencia
-
-- [ ] A `mitigations.yml` szekciónevei pontosan megegyeznek a feladatlap parancsaiban (`push_config.py ... <szekció>`)
-- [ ] Minden szekció `post:` blokkja olyan show-parancsot tartalmaz, ami a védelem sikerét igazolja
-- [ ] A dependency-sorrend (snooping → IPSG) dokumentálva van a menet-táblában
-
-### 2.5 Nyelvhelyesség (magyar)
-
-- [ ] Nincs idegen nyelvű maradvány (angol/holland/kínai szavak: „aktif", „actief", „常见问题", „留存", „连接elni", „PIPPA", „TIOS", „mgbízhatóbb", „Rekonstrukció" kontextustól függően)
-- [ ] Írásjelek, ékezetek, kötőjelek helyesek (pl. „pontosan", „megbízhatóbb", „ Feldolgozás biztonsága")
-- [ ] Technikai szakkifejezések egységesek (MITM, rogue DHCP, err-disabled, sticky MAC)
-
-### 2.6 Pedagógiai koherencia
-
-- [ ] Minden fázis követi az „áldozat → védelem → újratámadás" mintát
-- [ ] A reflexiós lap kérdései a labor konkrét megfigyeléseire hivatkoznak (fázisszámokkal)
-- [ ] Rubric-kritériumok differenciálódnak (nem csak „megcsinálta / nem csinálta meg")
-
-### 2.7 Adatvédelmi-megfelelőség
-
-- [ ] A csomag tartalmaz tájékoztatást az izolált labor követelményéről (informed consent, pcapture-törlés, pszeudonimizálás)
-- [ ] A reflexiós lap GDPR-elvpárosítást tartalmaz
-
----
-
-## RÉSZ 3 — A JELEN CSOMAG AUDIT EREDMÉNYE (végső riport)
-
-Az alábbi táblázat a **jelen, végleges csomagra** lefuttatott ellenőrzés eredménye.
-
-### 3.1 Rendben lévő részek
-
-| #   | Elem                              | Állapot   | Megjegyzés                                                                                 |
-| --- | --------------------------------- | --------- | ------------------------------------------------------------------------------------------ |
-| 1   | 12 támadás lefedettsége           | ✅ Rendben | Mátrix, menet, feladatlap, reflexiós lap mind a 12-t tartalmazza                           |
-| 2   | Fázisszám-konzisztencia           | ✅ Rendben | Feladatlap 1–12, reflexiós lap hivatkozásai (5=ARP, 4=rogue, 11=LLDP) egyeznek a mesterrel |
-| 3   | Attacker-szkriptek futtathatósága | ✅ Rendben | Mind scapy + sudo, docstring usage-sort tartalmaz                                          |
-| 4   | rogue_dhcp.py változóhibája       | ✅ Javítva | `yiaddr` → `offer_ip` a mester végleges verziójában                                          |
-| 5   | Baseline sebezhetőség             | ✅ Javítva | `transport input telnet ssh` + CDP be + redirects be a javított baseline-ban               |
-| 6   | YAML-szekciónevek                 | ✅ Rendben | A 12 szekció neve a feladatlap parancsaival azonos                                         |
-| 7   | Függőség dokumentálva             | ✅ Rendben | `snooping → IPSG` a menet-táblában és a feladatlapban is szó van róla                      |
-| 8   | Reflexiós lap MITM-tartalma       | ✅ Rendben | HTTP/HTTPS(SNI, stripping, CA)/DNSSEC vs DoH/SNMP/NTP + GDPR-rubric                        |
-| 9   | Pontozás, jegy, exit-kód          | ✅ Rendben | verify.py: 27 ellenőrzés, %-számítás, jegy, JSON-opció                                              |
-| 10  | Adatvédelmi csomagrészek          | ✅ Rendben | Informed consent, pcapture-törlés, pszeudonimizálás, GDPR-táblázat                         |
-
-### 3.2 Javított hibák (a korábbi verziókhoz képest)
-
-| #   | Hiba                                                | Hol volt                 | Javítás                                                                                                       |
-| --- | --------------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------- |
-| 1   | `rogue_dhcp.py` NameError (`yiaddr` nem definiált)  | korai mester + expansion | `offer_ip` a végleges mesterben                                                                               |
-| 2   | Baseline Telnet tiltva volt (`transport input ssh`) | eredeti baseline.yml     | `transport input telnet ssh` a javított baseline-ban, beépítve a mesterbe (5. fejezet)                                     |
-| 3   | Idegen nyelvű maradványok                           | reflexiós lap, index     | „留存", „常见问题", „替代方案", „aktif/actief", „Feldolgozás Biztonság" → javítva a végleges reflexiós lapban |
-| 4   | Nyelvhelyességi hibák                               | több doksiban            | „PIPPA"→„Pipa", „TIOS"→„tilos", „mgbízhatóbb"→„megbízhatóbb", „connectelni"→„csatlakozni"                     |
-| 5   | Feladatlap lemaradt a 9–12. fázisokról              | korai feladatlap         | Végleges feladatlap mind a 12 fázissal + hiányzó 2. és 4. fázis                                               |
-| 6   | Fázis-eltolódás (ARP poisoning „4. vagy 5. fázis")  | régi reflexiós lap       | Egységes számozás 1–12-ig mindenhol                                                                           |
-
-### 3.3 Nyitott pontok (áthelyezhetőek a jövőbeni béta-tesztekre)
-
-| #   | Pont                                       | Miért maradt nyitva                                                                                  | Javaslat                                                                                       |
-| --- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| 1   | verify.py regex-minták platform-validálása | A minták a platformokon eltérő show-kimenetekre vannak írva; csak valódi IOS-en tesztelhető           | Száraz futás után a `--verbose` kimenet alapján finomhangolni                                  |
-| 2   | LLDP szintaxis platform-függése            | `no lldp transmit/receive` vs `no lldp run` IOS-verziófüggő                                           | Első push-kor ellenőrizni és a YAML-ben rögzíteni                                              |
-| 3   | STP takeover scapy-megbízhatósága          | A kézzel épített BPDU nem minden switchen vált ki konvergenciát                                       | A dokumentált `brctl addbr br0` + `setbridgeprio 0` alternatíva használata, ha a scapy nem működik |
-| 4   | ICMP-redirect démon kernel-függése         | `accept_redirects=1` kell a PC-V-n; egyes disztribúciók az `rp_filter` miatt is eldobhatják a csomagot | A feladatlapban rögzített sysctl-előkészület; ha nem működik, az `rp_filter` ideiglenes kikapcsolása |
-| 5   | ECH/DoH háttéranyag aktualitása            | 2024+ fejlemény; a kurzusanyag nem frissül automatikusan                                              | Évenkénti tananyag-review ehhez a laphoz                                                       |
-| 6   | Index-dokumentum linkeinek validálása      | Külső URL-ek (Cisco, IETF) eltűnhetnek                                                                | Link-ellenőrzés kiadás előtt                                                                   |
-
-### 3.4 Ítélet
-
-Oktatási célra, izolált laborban használható; a 3.3 nyitott pontok béta-tesztben zárandók. A 12 fázis, a 27 ellenőrzés, a feladatlap és a reflexiós lap konzisztensek; az 1–2. rész protokollja alapján a csomag újragenerálható és auditálható.
-
----
-
-*Dokumentum-verzió: v2.5 | Utolsó frissítés: 2026-11-10 | Audit módszer: az 1.2-2.7-es szempontok szerinti manuális revízió*
+*Dokumentum-verzió: v2.6 | Utolsó frissítés: 2026-11-12*
 
 ---
 
@@ -343,6 +249,7 @@ Oktatási célra, izolált laborban használható; a 3.3 nyitott pontok béta-te
 
 > Munkamenetre vonatkozó változásnapló. Minden módosítás timestamp-pel (ÉÉÉÉ-HH-NN).
 
+- **2026-11-12:** Az instrukciós dokumentumból eltávolítva minden audit-tartalom: a **RÉSZ 2 — ELLENŐRZÉSI PROTOKOLL** és a **RÉSZ 3 — A JELEN CSOMAG AUDIT EREDMÉNYE** szekciók törölve, a lábléc „Audit módszer" része és a bevezető ellenőrzőlista-utalása szintén. A fájl átnevezve `AI-instrukcio.md`-re (a név már nem utal auditra); a README és a könyv hivatkozásai frissítve. A `verify.py` leírása a RÉSZ 1-ben a jegy/pont nélküli (Pipa/Hiba) viselkedésre igazítva. A megmaradt tartalom: RÉSZ 0 (bővítési roadmap), RÉSZ 1 (reprodukciós instrukció), VÁLTOZÁSNAPLÓ. A két forrásdokumentum (`mester-labor-dokumentacio.md`, `vegigvezetes-labor-felallitas.md`) törölve, mert tartalmuk teljesen beolvadt az összevont könyvbe. Instrukció v2.6-ra frissítve.
 - **2026-11-10:** A repó mostantól minden labor-fájlt tartalmaz, kézzel semmit nem kell létrehozni. Kinyerve és commitolva: `inventory.yml`, `configs/baseline.yml`, `configs/mitigations.yml`, `push_config.py`, valamint az `attacker/` mappa 12 szkriptje (mac_flood, mac_spoof, dhcp_starve, rogue_dhcp, arp_spoof, stp_takeover, vlan_hop_recon, cdp_telnet_recon, vlan_double_tag, ip_spoof, lldp_recon, icmp_redirect). Új `requirements.txt` (netmiko, pyyaml, scapy); a könyv 10. fejezetében ez az **1. (ajánlott) telepítési opció** (`pip install -r requirements.txt`). A `verify.py` átírva: **nem ad jegyet és nem pontoz**, csak ellenőrzi a beállításokat (Pipa/Hiba/SKIP, kilépési kód 0, ha minden átment); a jegy/pont-táblázat eltávolítva a szkriptből és a könyvből. A könyvben az áldozat gép lehet **Windows is, Wireshark-kal** (nem csak Linux+tcpdump): a IV. rész bevezetőjében és az érintett fázisoknál Wireshark-szűrők (`arp`, `icmp`, `bootp`, `ip.src`) és Windows-parancsok (`ipconfig /release|/renew`, `arp -a`) megadva. A felhasználó kézi markdown-formázási módosításai megőrizve. Instrukció v2.5-re frissítve.
 - **2026-11-10:** Összevont könyv hozzáadva: `docs/srwe-labor-konyv.md` — a `vegigvezetes-labor-felallitas.md` és a `mester-labor-dokumentacio.md` egyetlen, lépésről lépésre követhető kézikönyvbe vonva, könyvstruktúrában (I–V. rész, 28 fejezet). Pythonhoz nem feltételez előismeretet: teljes **venv + VSCode** környezetfelállítás nulláról (Windows/macOS/Linux), minden parancs közvetlenül másolható. A README belépési pontja erre mutat; a két forrásdokumentum változatlanul megmarad referenciaként. Instrukció v2.4-re frissítve.
 - **2026-11-10:** Új végigvezető kézikönyv hozzáadva: `docs/vegigvezetes-labor-felallitas.md` — mit mire használunk, a labor felállítása (hardver, topológia, szoftver, baseline) és a 12 fázis végigjátszása, pontozás, visszaállítás, hibakeresési gyorslista. A README is hivatkozik rá belépési pontként. Instrukció v2.3-ra frissítve.

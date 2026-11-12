@@ -1806,7 +1806,7 @@ sudo sysctl -w net.ipv4.conf.eth0.accept_redirects=0
 
 ## 28\. Hogyan tovább — bővítés (13–16. fázis)
 
-A labor ugyanezzel a ritmussal (támadás → védelem → verify) négy további fázissal bővíthető. A teljes értékelő táblázat és a scapy-vázak a `docs/AI-instrukcio-es-vegso-audit.md` RÉSZ 0-ban vannak:
+A labor ugyanezzel a ritmussal (támadás → védelem → verify) négy további fázissal bővíthető. A teljes értékelő táblázat és a scapy-vázak a `docs/AI-instrukcio.md` RÉSZ 0-ban vannak:
 
 1. **13. HSRP/VRRP/GLBP eltérítés** — gateway-MITM FHRP-n át → védelem: `standby … authentication md5`
 
@@ -1820,4 +1820,4 @@ A labor ugyanezzel a ritmussal (támadás → védelem → verify) négy tovább
 
 ---
 
-_A könyv vége. A forrásdokumentumok (`mester-labor-dokumentacio.md`, `vegigvezetes-labor-felallitas.md`) változatlanul a repóban maradnak referenciaként; ez a könyv a kettő összevont, lépésről lépésre követhető változata._
+_A könyv vége. Ez a könyv a korábbi mester- és végigvezető dokumentáció összevont, lépésről lépésre követhető, önálló változata — minden szükséges tartalom benne van._

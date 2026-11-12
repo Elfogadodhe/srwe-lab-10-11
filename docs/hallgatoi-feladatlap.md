@@ -1,7 +1,7 @@
 # SRWE Modul 10–11 — Hallgatói Feladatlap (VÉGLEGES, 12 fázis)
 ## 12 Layer 2 támadás és védelem | Python automatizálással
 
-**Kitöltendő a labor során | A fázisszámok megegyeznek a mester dokumentum fázistáblájával**
+**Kitöltendő a labor során | A fázisszámok megegyeznek az összevont labor könyv (`srwe-labor-konyv.md`) fázistáblájával**
 
 ---
 
@@ -452,7 +452,7 @@ python3 verify.py inventory.yml
 | LLDP TX/RX letiltva user-portokon | Igen | _____ | ___ |
 | ICMP redirect letiltva (R1, VLAN 10 és 20 alinterfész) | Igen | _____ | ___ |
 
-**Átment ellenőrzések:** ___ / 27  |  **Elért pontszám:** ______ %  |  **Vélhető jegy:** ______
+**Átment ellenőrzések:** ___ / 27
 
 **Teljesített fázisok száma:** ___ / 12
 
