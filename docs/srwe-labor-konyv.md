@@ -165,10 +165,10 @@ Ha valami ilyet ír ki — `Python 3.10.x` (bármi 3.8 felett jó) —, **ugorha
 
 4. Zárd be és nyisd újra a VSCode-ot (hogy észlelje a Pythont).
 
-5. Ellenőrzés a terminálban (Windowson gyakran `python` a parancs, nem `python3`):
+5. Ellenőrzés a terminálban. **Windowson a `python3` gyakran nem a Pythont indítja, hanem megnyitja a Microsoft Store-t — ezért Windowson a `py` indítót használd:**
 
   ```bash
-  python --version
+  py --version
   ```
 
 ### macOS
@@ -192,7 +192,13 @@ sudo apt install -y python3 python3-pip python3-venv
 python3 --version
 ```
 
-> **Megjegyzés a parancsnevekről:** Windowson a Python általában `python` és `pip`, macOS/Linuxon `python3` és `pip3`. A könyv a `python3` / `pip` alakot használja — ha Windowson a `python3` nem működik, írj `python`-t helyette.
+> **Megjegyzés a parancsnevekről (különösen Windowson):** a könyv a `python3` / `pip` alakot használja (ez macOS/Linuxon a megszokott). **Windowson viszont a `python3` gyakran nem a Pythont futtatja, hanem megnyitja a Microsoft Store-t** — ezért Windowson a megbízható parancs a **`py`** (a hivatalos telepítővel települő Python-indító, ami akkor is működik, ha a `python`/`python3` nincs a PATH-ban). Tehát Windowson:
+>
+> * `python3 …` helyett → **`py …`** (pl. `py --version`, `py -m venv .venv`, `py push_config.py …`, `py verify.py …`)
+>
+> * `pip …` helyett → **`py -m pip …`** (pl. `py -m pip install -r requirements.txt`)
+>
+> macOS/Linuxon maradj a `python3` / `pip` alaknál.
 
 ## 8\. A projektmappa létrehozása VSCode-ban
 
@@ -312,29 +318,63 @@ A listában látnod kell a `netmiko`, `PyYAML`, illetve `scapy` sorokat.
 
 ## 12\. Topológia és címzés
 
+```mermaid
+graph TD
+    subgraph VLAN99["Menedzsment &middot; VLAN 99 &middot; 10.0.99.0/24"]
+        PCA["PC-A: admin / netmiko<br/>NIC 10.0.99.10"]
+    end
+    subgraph VLAN10["User &middot; VLAN 10 &middot; 10.10.10.0/24"]
+        PCV["PC-V: áldozat<br/>NIC DHCP .11-.254"]
+        ATK["ATTACKER: támadó<br/>scapy, root"]
+    end
+    subgraph VLAN20["Test &middot; VLAN 20 &middot; 10.20.20.0/24"]
+        PCW["PC-W: double-tag cél<br/>NIC 10.20.20.0/24"]
+    end
+    R1["R1: router-on-a-stick + DHCP<br/>Gi0/0 10.0.99.254 mgmt GW<br/>Gi0/1.10 10.10.10.1<br/>Gi0/1.20 10.20.20.1<br/>Gi0/1.99 10.0.99.253"]
+    S1["S1 switch<br/>SVI VLAN99 10.0.99.1"]
+    S2["S2 switch<br/>SVI VLAN99 10.0.99.2"]
+    R1 ===|"Gi0/1 trunk VLAN 10,20,99"| S1
+    R1 -.->|"Gi0/0 mgmt access VLAN 99"| S1
+    S1 ===|"Fa0/24 trunk VLAN 10,20,99"| S2
+    PCV ---|"S1 Fa0/1 access VLAN 10"| S1
+    PCA ---|"S1 Fa0/2 access VLAN 99"| S1
+    ATK ---|"S1 Fa0/3 access VLAN 10"| S1
+    PCW ---|"S2 Fa0/1 access VLAN 20"| S2
 ```
-                         ┌─────────────┐
-                         │   R1        │  DHCP szerver (VLAN 10), GW
-                         │  Gi0/1      │  + subinterface-ek (.10, .20, .99)
-                         └──────┬──────┘
-                                │ trunk
-        ┌───────────────────────┴─────────────────────┐
-        │                    S1                       │
-        │  Fa0/1: PC-V (áldozat, VLAN 10)             │
-        │  Fa0/2: PC-A (admin, VLAN 99, netmiko)      │
-        │  Fa0/3: ATTACKER (támadó, VLAN 10)          │
-        │  Fa0/24: → S2 Fa0/24 (trunk, VLAN 10,20,99) │
-        └───────────────────────┬─────────────────────┘
-                                │
-                         ┌──────┴──────┐
-                         │     S2      │
-                         │ Fa0/1: PC-W │  (VLAN 20 — double-tagging cél)
-                         └─────────────┘
 
-Management VLAN 99:  S1 = 10.0.99.1, S2 = 10.0.99.2, R1 = 10.0.99.254, PC-A = 10.0.99.10
-User VLAN 10:        10.10.10.0/24  (PC-V, ATTACKER, DHCP pool az R1-en)
-Test VLAN 20:        10.20.20.0/24  (PC-W — csak a 9. fázishoz kell)
-```
+> Az ábra **Mermaid** formátumú, ezért a GitHubon és a legtöbb Markdown-nézegetőben (VSCode Markdown-előnézet Mermaid-támogatással, Obsidian, GitLab) **renderelt ábraként** jelenik meg. A `===` a trunk, a `-.->` a dedikált menedzsment-kapcsolat, a sima vonal pedig az access-port.
+
+### Interfészek és IP-címzés
+
+| Eszköz | Interfész | VLAN / típus | IP-cím | Szerep |
+|---|---|---|---|---|
+| **R1** | Gi0/0 | VLAN 99 (access) | `10.0.99.254/24` | A switchek default-gateway-e (menedzsment) |
+| **R1** | Gi0/1 | trunk (szülő) | — (nincs IP) | Router-on-a-stick trunk S1 felé |
+| **R1** | Gi0/1.10 | VLAN 10 (dot1Q) | `10.10.10.1/24` | VLAN 10 átjáró + DHCP-kiszolgáló |
+| **R1** | Gi0/1.20 | VLAN 20 (dot1Q) | `10.20.20.1/24` | VLAN 20 átjáró |
+| **R1** | Gi0/1.99 | VLAN 99 (dot1Q) | `10.0.99.253/24` | VLAN 99 inter-VLAN routing |
+| **S1** | SVI VLAN 99 | VLAN 99 | `10.0.99.1/24` | S1 menedzsment-IP (SSH / netmiko) |
+| **S1** | Fa0/1 | VLAN 10 (access) | — | PC-V (áldozat) |
+| **S1** | Fa0/2 | VLAN 99 (access) | — | PC-A (admin / netmiko) |
+| **S1** | Fa0/3 | VLAN 10 (access) | — | ATTACKER (támadó) |
+| **S1** | Fa0/24 | trunk | — | Trunk S2 felé (VLAN 10,20,99) |
+| **S2** | SVI VLAN 99 | VLAN 99 | `10.0.99.2/24` | S2 menedzsment-IP (SSH / netmiko) |
+| **S2** | Fa0/1 | VLAN 20 (access) | — | PC-W (double-tagging cél) |
+| **S2** | Fa0/24 | trunk | — | Trunk S1 felé (VLAN 10,20,99) |
+| **PC-A** | NIC | VLAN 99 | `10.0.99.10/24` (statikus) | Admin gép, netmiko-t futtat |
+| **PC-V** | NIC | VLAN 10 | `10.10.10.0/24` (DHCP, `.11`–`.254`) | Áldozat |
+| **ATTACKER** | NIC | VLAN 10 | `10.10.10.0/24` | Támadó (scapy, root) |
+| **PC-W** | NIC | VLAN 20 | `10.20.20.0/24` | Double-tagging cél (9. fázis) |
+
+### VLAN-összefoglaló
+
+| VLAN | Szerep | Alhálózat | Átjáró |
+|---|---|---|---|
+| **10** | User (áldozat + támadó) | `10.10.10.0/24` | `10.10.10.1` (R1 Gi0/1.10) |
+| **20** | Test (double-tag cél) | `10.20.20.0/24` | `10.20.20.1` (R1 Gi0/1.20) |
+| **99** | Menedzsment | `10.0.99.0/24` | `10.0.99.254` (R1 Gi0/0) |
+
+> **DHCP:** a VLAN 10 pool (`USERS`) a `10.10.10.0/24` hálózatot osztja; a `10.10.10.1`–`10.10.10.10` tartomány kizárva (statikus/átjáró), így a PC-V a `.11`-től felfelé kap címet.
 
 **Gépkövetelmények (emlékeztető):**
 
