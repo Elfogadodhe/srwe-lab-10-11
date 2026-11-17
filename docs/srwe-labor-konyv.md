@@ -1421,7 +1421,7 @@ interface FastEthernet 0/2
  switchport mode access
  swtichport access vlan 99
 interface FastEthernet 0/24
- switchpot mode trunk
+ switchport mode trunk
 interface GigabitEthernet 0/1
  switchport mode trunk
 exit
@@ -1444,7 +1444,7 @@ interface vlan 99
  ip address 10.0.99.2 255.255.255.0
  no shutdown
 interface FastEthernet 0/24
- switchpot mode trunk
+ switchport mode trunk
 exit
 line vty 0 4
  login local
