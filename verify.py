@@ -6,10 +6,10 @@ pontoz — csak leellenőrzi, hogy minden védelmi beállítás a helyén van-e,
 és felsorolja, melyik ellenőrzés ment át (Pipa) és melyik nem (Hiba).
 
 Használat:
-    python3 verify.py inventory.yml               # ellenőrzés
-    python3 verify.py inventory.yml --verbose     # nyers kimenetekkel
-    python3 verify.py inventory.yml --json out.json
-    python3 verify.py inventory.yml --only S1     # csak egy eszköz
+    python verify.py inventory.yml               # ellenőrzés
+    python verify.py inventory.yml --verbose     # nyers kimenetekkel
+    python verify.py inventory.yml --json out.json
+    python verify.py inventory.yml --only S1     # csak egy eszköz
 
 Függőségek: pip install netmiko pyyaml
 Kilépési kód: 0 ha minden (elérhető eszközön futtatott) ellenőrzés átment,

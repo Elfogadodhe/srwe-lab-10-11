@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """DTP-keretek figyelése: ha a port 'dynamic' módban van, trunkolható.
 
-Futtatás: sudo python3 vlan_hop_recon.py eth0
+Futtatás: sudo python vlan_hop_recon.py eth0
 """
 import sys
 from scapy.all import sniff, Ether

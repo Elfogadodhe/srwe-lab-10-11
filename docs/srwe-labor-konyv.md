@@ -139,7 +139,7 @@ A laborban három "szereplő" van. Ezek lehetnek külön fizikai gépek vagy kü
 > Ellenőrizd először, hátha már fenn van. Nyisd meg a VSCode-ban a terminált: felső menü → **Terminal → New Terminal** (vagy \`Ctrl+\`\`). Majd írd be:
 
 ```bash
-python3 --version
+python --version
 ```
 
 Ha valami ilyet ír ki — `Python 3.10.x` (bármi 3.8 felett jó) —, **ugorhatsz a 8. fejezetre**. Ha "command not found" vagy hasonló hibát kapsz, telepítsd a rendszered szerint:
@@ -150,11 +150,13 @@ Ha valami ilyet ír ki — `Python 3.10.x` (bármi 3.8 felett jó) —, **ugorha
 2. Indítsd a telepítőt, és **nagyon fontos**: pipáld be alul az **"Add python.exe to PATH"** jelölőnégyzetet, mielőtt a telepítésre kattintasz.
 3. Kattints **Install Now**, majd a végén **Close**.
 4. Zárd be és nyisd újra a VSCode-ot (hogy észlelje a Pythont).
-5. Ellenőrzés a terminálban. **Windowson a `python3` gyakran nem a Pythont indítja, hanem megnyitja a Microsoft Store-t — ezért Windowson a `py` indítót használd:**
+5. Ellenőrzés a terminálban:
 
 ```bash
-py --version
+python --version
 ```
+
+> **Ha a `python` megnyitja a Microsoft Store-t** (ez előfordul, ha a telepítőben nem pipáltad be az „Add python.exe to PATH"-t): telepítsd újra a Pythont bepipált PATH-opcióval, vagy írd ideiglenesen a `py` indítót (`py --version`). A venv aktiválása után (9. fejezet) a `python` mindenképp működik.
 
 ### macOS
 
@@ -166,27 +168,23 @@ A legegyszerűbb a Homebrew nevű csomagkezelővel. A terminálban:
 # 2) Python telepítése:
 brew install python
 # 3) Ellenőrzés:
-python3 --version
+python --version
 ```
 
 ### Linux (Ubuntu/Debian)
 
 ```bash
 sudo apt update
-sudo apt install -y python3 python3-pip python3-venv
-python3 --version
+# A python-is-python3 adja a 'python' parancsot (Ubuntu/Debianon alapból csak 'python3' van)
+sudo apt install -y python3 python3-pip python3-venv python-is-python3
+python --version
 ```
 
-> **Megjegyzés a parancsnevekről — operációs rendszerenként.** A könyv végig a `python3` / `pip` alakot írja. Ezt a saját rendszered szerint fordítsd le:
+> **Megjegyzés a parancsnevekről.** A könyv **mindenhol a `python` parancsot használja**, mert ez mindhárom rendszeren (Windows, macOS, Linux) működik — Windowson a hivatalos telepítővel (PATH-ba téve), macOS-en a Homebrew/python.org Pythonnal, Linuxon pedig a fenti `python-is-python3` csomaggal. A `pip` is egységesen `pip`. **Fontos:** a venv aktiválása (9. fejezet) után a `.venv`-en belül a `python` és a `pip` **mindig** a projekt Pythonját használja, operációs rendszertől függetlenül — innentől semmilyen eltérés nincs.
 >
-> - **macOS és Linux:** használd pontosan úgy, ahogy a könyvben áll: **`python3`** és **`pip`** (a `py` parancs ezeken a rendszereken **nem létezik**, ne azt írd).
+> - **Windows-tipp:** ha a `python` megnyitja a Microsoft Store-t (hiányzó PATH miatt), telepítsd újra a Pythont bepipált „Add python.exe to PATH" opcióval; átmenetileg a `py` indító is jó (`py -m venv .venv`).
 >
-> - **Windows:** a `python3` gyakran nem a Pythont futtatja, hanem **megnyitja a Microsoft Store-t**. Ezért Windowson a megbízható indító a **`py`** (ez a hivatalos telepítővel jön, és akkor is működik, ha a `python`/`python3` nincs a PATH-ban). Windowson tehát:
->
->   - `python3 …` helyett → **`py …`** (pl. `py --version`, `py -m venv .venv`, `py push_config.py …`, `py verify.py …`)
->   - `pip …` helyett → **`py -m pip …`** (pl. `py -m pip install -r requirements.txt`)
->
-> Röviden: **`py` = csak Windows**, **`python3` = macOS/Linux**.
+> - **Linux-tipp:** ha nem telepíthetted a `python-is-python3` csomagot, a venv **létrehozásakor** egyszer írj `python3 -m venv .venv`-et — az aktiválás után már a `python` is működik.
 
 ## 8. A projektmappa létrehozása VSCode-ban
 
@@ -206,7 +204,7 @@ Nyisd meg a beépített terminált (**Terminal → New Terminal**). Győződj me
 **1) Hozd létre a venv-et** (ez egy `.venv` nevű "dobozt" készít a projektben):
 
 ```bash
-python3 -m venv .venv
+python -m venv .venv
 ```
 
 **2) Aktiváld a venv-et** — a rendszered szerint:
@@ -235,7 +233,7 @@ python3 -m venv .venv
   source .venv/bin/activate
   ```
 
-**Sikeres aktiválás jele:** a terminál sor elején megjelenik `(.venv)`. Innentől minden `pip install` ebbe a dobozba telepít, és minden `python3` ezt a Pythont használja.
+**Sikeres aktiválás jele:** a terminál sor elején megjelenik `(.venv)`. Innentől minden `pip install` ebbe a dobozba telepít, és minden `python` ezt a Pythont használja.
 
 > **Később, új terminál nyitásakor** mindig aktiváld újra a venv-et a fenti 2) paranccsal. Kilépni belőle a `deactivate` paranccsal tudsz.
 
@@ -246,7 +244,7 @@ A `requirements.txt` **már a repóban van**, ezért nem kell létrehoznod — c
 **1. opció (ajánlott) — telepítés a `requirements.txt`-ből egyetlen paranccsal.** Győződj meg róla, hogy aktív a venv (látszik a `(.venv)` jel), és a projekt gyökerében vagy, majd:
 
 ```bash
-python3 -m pip install --upgrade pip
+python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
@@ -281,12 +279,12 @@ A listában látnod kell a `netmiko`, `PyYAML`, illetve `scapy` sorokat.
 1. **Ettől kezdve** ha a VSCode-ban új terminált nyitsz, az gyakran **automatikusan aktiválja** a venv-et (látod a `(.venv)` jelet). Ha mégsem, aktiváld kézzel a 9. fejezet 2) parancsával.
 2. **A szkripteket kétféleképp futtathatod:**
 
-- A terminálban beírt paranccsal (ezt használja a könyv végig), pl. `python3 push_config.py ...`
+- A terminálban beírt paranccsal (ezt használja a könyv végig), pl. `python push_config.py ...`
 - VAGY a megnyitott `.py` fájl jobb felső sarkában a ▷ (Run) gombbal — de a labor parancsai argumentumokat várnak, ezért a **terminálos futtatás az ajánlott**.
 
 > ✅ **Ellenőrző pont a II. rész végén.** Mielőtt továbbmész, teljesülnie kell:
 >
-> - `python3 --version` (vagy `python --version`) kiír egy 3.8+ verziót,
+> - `python --version` kiír egy 3.8+ verziót,
 > - a terminál elején ott a `(.venv)` jel,
 > - a `pip list` mutatja a szükséges csomagokat.
 >
@@ -358,8 +356,8 @@ graph TD
 
 **Gépkövetelmények (emlékeztető):**
 
-- **PC-A (admin):** `python3`, `pip install netmiko pyyaml`
-- **ATTACKER (támadó):** `python3`, `pip install scapy`, root jog (raw socket)
+- **PC-A (admin):** `python`, `pip install netmiko pyyaml`
+- **ATTACKER (támadó):** `python`, `pip install scapy`, root jog (raw socket)
 - **PC-V / PC-W (áldozat / megfigyelő):** lehet **Linux** (`tcpdump` telepítve) **vagy Windows** (telepített **Wireshark**-kal) — a forgalomfigyeléshez bármelyik jó. A megfigyelő parancsok/lépések mindkét rendszerre megtalálhatók a IV. részben.
 
 > **Emulációban is megy:** GNS3 / EVE-NG / Cisco CML a switchekhez és R1-hez, a PC-khez Linux vagy Windows VM-ek. A scapy Layer 2-támadásaihoz a virtuális switch portoknak **promiscuous / trunk-áteresztő** módban kell lenniük, különben a keretek nem jutnak át.
@@ -540,7 +538,7 @@ R1:
 
 ## 16. `configs/mitigations.yml` — védelmek szekciónként
 
-Használat: `python3 push_config.py inventory.yml configs/mitigations.yml <szekció>`\
+Használat: `python push_config.py inventory.yml configs/mitigations.yml <szekció>`\
 A szekciók **sorrendje számít** — lásd a 23. fejezet függőségi megjegyzéseit.
 
 ```yaml
@@ -811,9 +809,9 @@ Ez a szkript olvassa be az `inventory.yml`-t és a kiválasztott konfigurációs
 """YAML-ban definiált konfiguráció feltöltése Cisco eszközökre.
 
 Használat:
-    python3 push_config.py inventory.yml configs/baseline.yml
-    python3 push_config.py inventory.yml configs/mitigations.yml port-security
-    python3 push_config.py inventory.yml configs/mitigations.yml   # minden szekció
+    python push_config.py inventory.yml configs/baseline.yml
+    python push_config.py inventory.yml configs/mitigations.yml port-security
+    python push_config.py inventory.yml configs/mitigations.yml   # minden szekció
 
 Megjegyzés: a pusher NEM szúr be automatikus 'exit'-et a konténerparancsok
 után — a YAML-ban azok explicit módon szerepelnek.
@@ -824,6 +822,10 @@ from netmiko import ConnectHandler
 from netmiko.exceptions import NetmikoAuthenticationException, NetmikoTimeoutException
 
 
+# Egy eszköz-konfigban ezek a (opcionális) kulcsok fordulhatnak elő.
+CONFIG_KEYS = {"global", "dhcp_pool", "interfaces", "post"}
+
+
 def parse_interface_key(key: str):
     """'range Fa0/4 - 23' -> ('interface range', 'Fa0/4 - 23')"""
     if key.startswith("range "):
@@ -831,7 +833,19 @@ def parse_interface_key(key: str):
     return "interface", key
 
 
+def is_device_cfg(body) -> bool:
+    """Igaz, ha a `body` egy eszköz-konfig (global/interfaces/dhcp_pool/post
+    kulcsokkal), nem pedig egy szekció (ami eszközneveket tartalmaz).
+    Így ugyanaz a szkript kezeli a lapos `baseline.yml`-t (eszköz → konfig)
+    és a szekciós `mitigations.yml`-t (szekció → eszköz → konfig) is."""
+    return isinstance(body, dict) and bool(set(body.keys()) & CONFIG_KEYS)
+
+
 def push_device(inventory: dict, device_name: str, device_cfg: dict, save: bool = True):
+    if device_name not in inventory.get("devices", {}):
+        print(f"[HIBA] A(z) '{device_name}' eszköz nincs az inventory.yml "
+              f"'devices' listájában — kihagyva.")
+        return False
     params = dict(inventory["devices"][device_name])
     print(f"\n=== {device_name} ({params['host']}) ===")
     try:
@@ -884,15 +898,42 @@ def main():
     with open(cfg_path) as f:
         config = yaml.safe_load(f)
 
+    # A két konfig-szerkezet automatikus felismerése:
+    #   - lapos (baseline.yml):   eszköz → konfig            (top-level: S1/S2/R1)
+    #   - szekciós (mitigations): szekció → eszköz → konfig  (top-level: port-security, ...)
+    flat = all(is_device_cfg(body) for body in config.values())
+
+    # Normalizálás egységes (szekció, eszköz, konfig) listává.
+    tasks = []
+    if flat:
+        if section_filter:
+            print(f"[MEGJEGYZÉS] A(z) '{cfg_path}' lapos (eszköz-szintű) fájl; "
+                  f"a(z) '{section_filter}' szűrőt eszköznévként értelmezem.")
+        for device_name, device_cfg in config.items():
+            tasks.append((None, device_name, device_cfg))
+    else:
+        for section_name, section_cfg in config.items():
+            for device_name, device_cfg in section_cfg.items():
+                tasks.append((section_name, device_name, device_cfg))
+
+    # Szűrés: szekciós fájlnál szekciónévre, lapos fájlnál eszköznévre.
+    if section_filter:
+        tasks = [t for t in tasks
+                 if (t[0] == section_filter) or (t[0] is None and t[1] == section_filter)]
+        if not tasks:
+            print(f"[HIBA] A(z) '{section_filter}' szűrőre nincs találat a(z) "
+                  f"'{cfg_path}' fájlban.")
+            sys.exit(1)
+
     failures = []
-    for section_name, section_cfg in config.items():
-        if section_filter and section_name != section_filter:
-            continue
-        if section_filter is None:
+    current_section = object()  # szekció-fejléc csak változáskor
+    for section_name, device_name, device_cfg in tasks:
+        if section_name is not None and section_name != current_section:
             print(f"\n########## SZEKCIÓ: {section_name} ##########")
-        for device_name, device_cfg in section_cfg.items():
-            if not push_device(inventory, device_name, device_cfg):
-                failures.append(f"{section_name}/{device_name}")
+            current_section = section_name
+        if not push_device(inventory, device_name, device_cfg):
+            label = f"{section_name}/{device_name}" if section_name else device_name
+            failures.append(label)
 
     if failures:
         print(f"\nSIKERTELEN: {', '.join(failures)}")
@@ -909,10 +950,10 @@ if __name__ == "__main__":
 Ez a szkript **már a repó gyökerében van** (`verify.py`) — nem kell létrehoznod. 27 ellenőrzést futtat, és megnézi, hogy minden védelmi beállítás a helyén van-e. **Nem ad jegyet és nem pontoz** — csak felsorolja, melyik ellenőrzés ment át (Pipa) és melyik nem (Hiba). Futtatása (a részletek a 24. fejezetben):
 
 ```bash
-python3 verify.py inventory.yml              # ellenőrzés
-python3 verify.py inventory.yml --verbose    # nyers show-kimenetekkel (hibakereséshez)
-python3 verify.py inventory.yml --json eredmeny.json   # gépi kiértékeléshez
-python3 verify.py inventory.yml --only S1    # csak egy eszköz
+python verify.py inventory.yml              # ellenőrzés
+python verify.py inventory.yml --verbose    # nyers show-kimenetekkel (hibakereséshez)
+python verify.py inventory.yml --json eredmeny.json   # gépi kiértékeléshez
+python verify.py inventory.yml --only S1    # csak egy eszköz
 ```
 
 ## 19. A 12 támadó szkript (`attacker/`)
@@ -928,7 +969,7 @@ Mire használod: véletlen forrás-MAC-okkal elárasztja a switch MAC-táblájá
 """MAC flooding: véletlen forrás-MAC-okkal tölti a CAM-táblát.
 A switch egy idő után hub-módba vált, és minden keretet minden portra másol.
 
-Futtatás: sudo python3 mac_flood.py eth0 10000
+Futtatás: sudo python mac_flood.py eth0 10000
 """
 import random, sys
 from scapy.all import Ether, IP, UDP, sendp, conf
@@ -961,7 +1002,7 @@ Mire használod: a legit áldozat MAC-címét veszi fel, hogy a sticky port-secu
 """A legit áldozat MAC-címét veszi fel a támadó — a port security
 sticky-listája miatt violation lép fel.
 
-Futtatás: sudo python3 mac_spoof.py eth0 00:50:56:AA:BB:01
+Futtatás: sudo python mac_spoof.py eth0 00:50:56:AA:BB:01
 """
 import sys, time
 from scapy.all import Ether, ARP, sendp, conf
@@ -989,7 +1030,7 @@ Mire használod: egyedi ügyfél-MAC-okkal küldött DISCOVER-ekkel kimeríti a 
 #!/usr/bin/env python3
 """Kimeríti a DHCP-poolt egyedi ügyfél-MAC-okkal küldött DISCOVER-ekkel.
 
-Futtatás: sudo python3 dhcp_starve.py eth0 250
+Futtatás: sudo python dhcp_starve.py eth0 250
 """
 import random, struct, sys
 from scapy.all import Ether, IP, UDP, BOOTP, DHCP, sendp, conf
@@ -1026,7 +1067,7 @@ Mire használod: hamis DHCP-szerver, amely az OFFER-ben a támadót adja gateway
 """Hamis DHCP-szerver: az OFFER-ben a támadót adja gateway-nek és DNS-nek.
 DHCP Snooping után ezek az üzenetek eldobódnak az untrusted porton.
 
-Futtatás: sudo python3 rogue_dhcp.py eth0
+Futtatás: sudo python rogue_dhcp.py eth0
 """
 import sys
 from scapy.all import Ether, IP, UDP, BOOTP, DHCP, sendp, sniff, conf
@@ -1072,7 +1113,7 @@ Mire használod: az áldozat és a gateway felé is a saját MAC-címét hazudja
 """Kétirányú ARP poisoning: az áldozat és a gateway felé is azt hazudjuk,
 hogy a másik MAC-címe a miénk. Így a kétirányú forgalom rajtunk át megy (MITM).
 
-Futtatás: sudo python3 arp_spoof.py eth0 10.10.10.20 10.10.10.1
+Futtatás: sudo python arp_spoof.py eth0 10.10.10.20 10.10.10.1
 """
 import sys, time
 from scapy.all import ARP, send, get_if_hwaddr, arping, conf
@@ -1109,7 +1150,7 @@ Mire használod: 0 prioritású (superior) BPDU-kat küld, hogy a támadó legye
 """0 prioritású BPDU-k küldése — a támadó igyekszik root bridge-gé válni.
 A BPDU Guard emiatt err-disabled állapotba teszi a portot.
 
-Futtatás: sudo python3 stp_takeover.py eth0
+Futtatás: sudo python stp_takeover.py eth0
 Alternatíva (megbízhatóbb): sudo brctl addbr br0 && sudo brctl setbridgeprio br0 0
                             && sudo ip link set br0 up
 """
@@ -1150,7 +1191,7 @@ Mire használod: DTP- és 802.1Q-kereteket figyel; ha lát DTP-t, a port trunkol
 #!/usr/bin/env python3
 """DTP-keretek figyelése: ha a port 'dynamic' módban van, trunkolható.
 
-Futtatás: sudo python3 vlan_hop_recon.py eth0
+Futtatás: sudo python vlan_hop_recon.py eth0
 """
 import sys
 from scapy.all import sniff, Ether
@@ -1183,7 +1224,7 @@ Mire használod: passzívan gyűjti a CDP-infót (platform, port, IOS-verzió) �
 #!/usr/bin/env python3
 """CDP-üzenetek passzív lehallgatása (platform, port, IOS-verzió) + Telnet-próba.
 
-Futtatás: sudo python3 cdp_telnet_recon.py eth0 10.0.99.1
+Futtatás: sudo python cdp_telnet_recon.py eth0 10.0.99.1
 """
 import socket, sys
 from scapy.all import sniff, Ether
@@ -1224,7 +1265,7 @@ Mire használod: dupla VLAN-címkével keretet juttat a VLAN 20-ba (a PC-W felé
 A második switch a BELSŐ taget értelmezi → a keret bejut a másik VLAN-ba.
 Egyirányú támadás: a válasz nem tud visszajutni.
 
-Futtatás: sudo python3 vlan_double_tag.py eth0 10.20.20.10 [outer] [inner]
+Futtatás: sudo python vlan_double_tag.py eth0 10.20.20.10 [outer] [inner]
 """
 import sys
 from scapy.all import Ether, Dot1Q, IP, ICMP, sendp, conf
@@ -1258,7 +1299,7 @@ Mire használod: hamis forrás-IP-jű csomagot küld; ezt csak az IP Source Guar
 Fontos: a keret a támadó VALÓDI MAC-jét hordozza, de hamis forrás-IP-t —
 a DHCP Snooping önmagában nem fogja meg, csak az IP Source Guard.
 
-Futtatás: sudo python3 ip_spoof.py eth0 10.10.10.50 [dst]
+Futtatás: sudo python ip_spoof.py eth0 10.10.10.50 [dst]
 """
 import sys, time
 from scapy.all import Ether, IP, UDP, sendp, conf
@@ -1291,7 +1332,7 @@ Mire használod: LLDPDU-kat gyűjt (rendszernév, port, menedzsment-IP), és opc
 plusz opcionálisan HAMIS LLDP-bejegyzés injektálása.
 LLDP: IEEE-szabvány, ethertype 0x88CC, multicast 01:80:c2:00:00:0e.
 
-Futtatás: sudo python3 lldp_recon.py eth0 [--inject]
+Futtatás: sudo python lldp_recon.py eth0 [--inject]
 """
 import sys
 from scapy.all import sniff, Ether, sendp, conf
@@ -1334,7 +1375,7 @@ Mire használod: az áldozatnak azt hazudja, hogy a gateway a támadón át érh
 """Gateway MITM ICMP Redirect-del: az áldozatnak azt hazudjuk, hogy a gateway
 a támadón át érhető el egy adott cél felé.
 
-Futtatás: sudo python3 icmp_redirect.py eth0 <victim_ip> <gateway_ip> [prefix]
+Futtatás: sudo python icmp_redirect.py eth0 <victim_ip> <gateway_ip> [prefix]
 Megjegyzés: a demonstrációhoz az áldozat VM-en engedélyezni kell:
   sysctl -w net.ipv4.conf.eth0.accept_redirects=1
 (a modern alapértelmezés tiltja — ez maga is tanulság!)
@@ -1470,7 +1511,7 @@ Ha mindhárom válaszol, mehet a feltöltés. Ha nem: lásd a 27. hibakeresési 
 A baseline a **védtelen kiinduló állapot**: minden védelem KI, az eszközök elérhetők, és a vty-sorokon a Telnet is nyitva (hogy a 8. fázis demózható legyen). Töltsd fel:
 
 ```bash
-python3 push_config.py inventory.yml configs/baseline.yml
+python push_config.py inventory.yml configs/baseline.yml
 ```
 
 **Elvárt eredmény:** S1, S2, R1 elérhető SSH-n ÉS Telneten, egyetlen védelem sincs aktív. Gyors ellenőrzés:
@@ -1495,16 +1536,16 @@ A kimenetben szerepelnie kell: `transport input telnet ssh`. Ezzel a labor **ké
 - **PC-A terminál** — az admin gépen, aktív venv-vel, a védelmek feltöltéséhez (`push_config.py`).
 - **PC-V / PC-W terminál** — az áldozat/megfigyelő gépen a hatás nézéséhez (`tcpdump`).
 
-> **`sudo` és a venv (fontos a támadó szkripteknél!):** a `sudo` alapból kilép a venv-ből, így a `sudo python3 ...` a rendszer Pythonját futtatná, amelyben nincs scapy. Két megoldás:
+> **`sudo` és a venv (fontos a támadó szkripteknél!):** a `sudo` alapból kilép a venv-ből, így a `sudo python ...` a rendszer Pythonját futtatná, amelyben nincs scapy. Két megoldás:
 >
 > 1. telepítsd a scapy-t rendszerszinten is a támadó gépen: `sudo pip install scapy`, VAGY
 > 2. add meg a venv Pythonjának teljes útját, pl.:
 >
 > ```bash
-> sudo .venv/bin/python3 attacker/mac_flood.py eth0 10000
+> sudo .venv/bin/python attacker/mac_flood.py eth0 10000
 > ```
 >
-> Az alábbi parancsok az egyszerűség kedvéért `sudo python3 ...` alakban szerepelnek — ha „ModuleNotFoundError: scapy" hibát kapsz, használd a fenti 2. megoldást.
+> Az alábbi parancsok az egyszerűség kedvéért `sudo python ...` alakban szerepelnek — ha „ModuleNotFoundError: scapy" hibát kapsz, használd a fenti 2. megoldást.
 
 > **Megfigyelés a PC-V/PC-W-n — Linux vagy Windows, ahogy neked kényelmes.** A támadás előtt, külön ablakban indítsd el a csomagfigyelőt:
 >
@@ -1525,14 +1566,14 @@ A kimenetben szerepelnie kell: `transport input telnet ssh`. Ezzel a labor **ké
 **(1) Támadás** (ATTACKER):
 
 ```bash
-sudo python3 attacker/mac_flood.py eth0 10000
+sudo python attacker/mac_flood.py eth0 10000
 ```
 
 **(2) Megfigyelés:** a switch CAM-táblája megtelik, a switch elkezd mindenkinek mindent továbbítani → a PC-V-n idegen (nem neki címzett) forgalom jelenik meg. Linuxon `tcpdump -i eth0 -n`, Windowson Wireshark — szűrő nélkül (vagy `not arp` a zaj szűrésére) látszik a sok idegen keret.\
 **(3) Védelem** (PC-A):
 
 ```bash
-python3 push_config.py inventory.yml configs/mitigations.yml port-security
+python push_config.py inventory.yml configs/mitigations.yml port-security
 ```
 
 **(4) Újratámadás:** futtasd újra az 1. lépés parancsát. Most a Fa0/3 `violation shutdown` miatt **err-disabled** állapotba kerül (Fa0/1-en `restrict` + sticky), a CAM nem telik meg.
@@ -1548,7 +1589,7 @@ Előbb jegyezd fel a PC-V MAC-címét (a PC-V-n: `ip link show eth0`), és írd 
 **(1) Támadás** (ATTACKER):
 
 ```bash
-sudo python3 attacker/mac_spoof.py eth0 <PC-V-MAC>
+sudo python attacker/mac_spoof.py eth0 <PC-V-MAC>
 ```
 
 **(2) Megfigyelés:** az S1 syslogjában `port-security violation` üzenet.\
@@ -1562,14 +1603,14 @@ sudo python3 attacker/mac_spoof.py eth0 <PC-V-MAC>
 **(1) Támadás** (ATTACKER):
 
 ```bash
-sudo python3 attacker/dhcp_starve.py eth0 250
+sudo python attacker/dhcp_starve.py eth0 250
 ```
 
 **(2) Megfigyelés:** az R1-en sok hamis DHCP-binding keletkezik, a PC-V **nem kap IP-címet**.\
 **(3) Védelem** (PC-A):
 
 ```bash
-python3 push_config.py inventory.yml configs/mitigations.yml dhcp-snooping
+python push_config.py inventory.yml configs/mitigations.yml dhcp-snooping
 ```
 
 **(4) Újratámadás:** az untrusted porton rate-limit lép életbe, a hamis DHCP-üzeneteket a switch eldobja.
@@ -1581,7 +1622,7 @@ python3 push_config.py inventory.yml configs/mitigations.yml dhcp-snooping
 **(1) Támadás** (ATTACKER):
 
 ```bash
-sudo python3 attacker/rogue_dhcp.py eth0
+sudo python attacker/rogue_dhcp.py eth0
 ```
 
 majd a PC-V-n kérj új címet (DHCP renew):
@@ -1610,14 +1651,14 @@ Előbb derítsd ki a PC-V IP-jét (`<PC-V-IP>`), a gateway `10.10.10.1`.
 **(1) Támadás** (ATTACKER):
 
 ```bash
-sudo python3 attacker/arp_spoof.py eth0 <PC-V-IP> 10.10.10.1
+sudo python attacker/arp_spoof.py eth0 <PC-V-IP> 10.10.10.1
 ```
 
 **(2) Megfigyelés:** a PC-V-n az `arp -a` parancs (Linuxon és Windowson is ugyanez) — a gateway MAC-címe a **támadó** MAC-címe lett → a forgalom a támadón megy át. Wireshark-szűrő: `arp` (látod a hamis ARP-válaszokat).\
 **(3) Védelem** (PC-A):
 
 ```bash
-python3 push_config.py inventory.yml configs/mitigations.yml dai
+python push_config.py inventory.yml configs/mitigations.yml dai
 ```
 
 **(4) Újratámadás:** a DAI-statisztikában nő a `dropped`, az ARP-tábla **nem** változik.
@@ -1629,14 +1670,14 @@ python3 push_config.py inventory.yml configs/mitigations.yml dai
 **(1) Támadás** (ATTACKER):
 
 ```bash
-sudo python3 attacker/stp_takeover.py eth0
+sudo python attacker/stp_takeover.py eth0
 ```
 
 **(2) Megfigyelés:** védelem nélkül az eszközön `show spanning-tree root` szerint a **támadó** lett a root bridge → átfolyik rajta a forgalom.\
 **(3) Védelem** (PC-A):
 
 ```bash
-python3 push_config.py inventory.yml configs/mitigations.yml stp-guard
+python push_config.py inventory.yml configs/mitigations.yml stp-guard
 ```
 
 **(4) Újratámadás:** a Fa0/3 err-disabled lesz, a syslog jelez.
@@ -1650,14 +1691,14 @@ python3 push_config.py inventory.yml configs/mitigations.yml stp-guard
 **(1) Támadás** (ATTACKER):
 
 ```bash
-sudo python3 attacker/vlan_hop_recon.py eth0
+sudo python attacker/vlan_hop_recon.py eth0
 ```
 
 **(2) Megfigyelés:** védelem nélkül DTP-keret látszik, a port trunkká alakítható.\
 **(3) Védelem** (PC-A):
 
 ```bash
-python3 push_config.py inventory.yml configs/mitigations.yml vlan-hop
+python push_config.py inventory.yml configs/mitigations.yml vlan-hop
 ```
 
 **(4) Újratámadás:** nincs DTP, a portok fix access módban vannak, a nem használt portok lezárva.
@@ -1669,14 +1710,14 @@ python3 push_config.py inventory.yml configs/mitigations.yml vlan-hop
 **(1) Támadás** (ATTACKER):
 
 ```bash
-sudo python3 attacker/cdp_telnet_recon.py eth0 10.0.99.1
+sudo python attacker/cdp_telnet_recon.py eth0 10.0.99.1
 ```
 
 **(2) Megfigyelés:** a CDP-ben látszik az IOS-verzió, és a Telnet nyitva van (titkosítatlan bejelentkezés).\
 **(3) Védelem** (PC-A):
 
 ```bash
-python3 push_config.py inventory.yml configs/mitigations.yml hardening
+python push_config.py inventory.yml configs/mitigations.yml hardening
 ```
 
 **(4) Újratámadás:** nincs CDP, csak SSHv2, a Telnet elutasítva.
@@ -1697,14 +1738,14 @@ Windowson a **Wireshark**-ban a **Display filter** mezőbe írd: `icmp`.
 **(1) Támadás** (ATTACKER):
 
 ```bash
-sudo python3 attacker/vlan_double_tag.py eth0 10.20.20.10
+sudo python attacker/vlan_double_tag.py eth0 10.20.20.10
 ```
 
 **(2) Megfigyelés:** a PC-W (VLAN 20) **ICMP-t kap** a VLAN 10-es támadótól — a dupla címke átvitte a keretet a másik VLAN-ba.\
 **(3) Védelem** (PC-A):
 
 ```bash
-python3 push_config.py inventory.yml configs/mitigations.yml native-vlan-hardening
+python push_config.py inventory.yml configs/mitigations.yml native-vlan-hardening
 ```
 
 **(4) Újratámadás:** futtasd **újra** a double-tagging támadást — most a keret **nem** jut el a VLAN 20-ba.
@@ -1718,14 +1759,14 @@ python3 push_config.py inventory.yml configs/mitigations.yml native-vlan-hardeni
 **(1) Támadás** (ATTACKER):
 
 ```bash
-sudo python3 attacker/ip_spoof.py eth0 10.10.10.50
+sudo python attacker/ip_spoof.py eth0 10.10.10.50
 ```
 
 **(2) Megfigyelés:** védelem nélkül a hamis forrás-IP látszik a dróton. Linuxon `tcpdump -i eth0 -n`, Windowson Wireshark — a forrás-IP oszlopban feltűnik a hamisított cím (szűrő: `ip.src == <hamis-IP>`).\
 **(3) Védelem** (PC-A):
 
 ```bash
-python3 push_config.py inventory.yml configs/mitigations.yml ip-source-guard
+python push_config.py inventory.yml configs/mitigations.yml ip-source-guard
 ```
 
 **(4) Újratámadás:** a kereteket a hardver eldobja; ellenőrzés az eszközön: `show ip verify source`.
@@ -1737,14 +1778,14 @@ python3 push_config.py inventory.yml configs/mitigations.yml ip-source-guard
 **(1) Támadás** (ATTACKER):
 
 ```bash
-sudo python3 attacker/lldp_recon.py eth0 --inject
+sudo python attacker/lldp_recon.py eth0 --inject
 ```
 
 **(2) Megfigyelés:** LLDPDU-k láthatók (rendszernév, portok), és hamis LLDPDU injektálható.\
 **(3) Védelem** (PC-A):
 
 ```bash
-python3 push_config.py inventory.yml configs/mitigations.yml lldp-hardening
+python push_config.py inventory.yml configs/mitigations.yml lldp-hardening
 ```
 
 **(4) Újratámadás:** a user-portokon nincs LLDP TX/RX.
@@ -1765,14 +1806,14 @@ python3 push_config.py inventory.yml configs/mitigations.yml lldp-hardening
 **(1) Támadás** (ATTACKER):
 
 ```bash
-sudo python3 attacker/icmp_redirect.py eth0 <PC-V-IP> 10.10.10.1
+sudo python attacker/icmp_redirect.py eth0 <PC-V-IP> 10.10.10.1
 ```
 
 **(2) Megfigyelés:** a PC-V route-táblája a támadón át vezet — ellenőrzés a PC-V-n: `ip route`.\
 **(3) Védelem** (PC-A):
 
 ```bash
-python3 push_config.py inventory.yml configs/mitigations.yml icmp-redirect
+python push_config.py inventory.yml configs/mitigations.yml icmp-redirect
 ```
 
 **(4) Újratámadás:** a router többé sosem küld ICMP redirectet.
@@ -1805,15 +1846,15 @@ Alternatíva: `errdisable recovery cause psecure-violation` (automatikus vissza�
 A 12 védelem feltöltése után futtasd az ellenőrzőt a PC-A-n (aktív venv):
 
 ```bash
-python3 verify.py inventory.yml
+python verify.py inventory.yml
 ```
 
 További kapcsolók:
 
 ```bash
-python3 verify.py inventory.yml --verbose             # a nyers show-kimenetekkel (hibakereséshez)
-python3 verify.py inventory.yml --json eredmeny.json  # gépi kiértékeléshez (JSON export)
-python3 verify.py inventory.yml --only S1             # csak egy eszköz ellenőrzése
+python verify.py inventory.yml --verbose             # a nyers show-kimenetekkel (hibakereséshez)
+python verify.py inventory.yml --json eredmeny.json  # gépi kiértékeléshez (JSON export)
+python verify.py inventory.yml --only S1             # csak egy eszköz ellenőrzése
 ```
 
 **Mit csinál:** **27 ellenőrzést** futtat. Minden ellenőrzés pozitív (KELL szerepelnie) és/vagy negatív (NEM SZABAD szerepelnie) regex-mintákkal nézi meg az eszköz `show`-kimenetét. A szkript **nem ad jegyet és nem pontoz** — minden sornál kiírja, hogy **Pipa** (a védelem a helyén van) vagy **Hiba** (hiányzik/rossz a beállítás), a végén pedig összesíti: `Átment ellenőrzések: X / 27`, és felsorolja a hibás sorokat.
@@ -1836,7 +1877,7 @@ A 12. fázis után töltsd ki a `docs/reflexios-lap.md`-et. Ez a MITM-támadáso
 A labor végén állítsd vissza a védtelen kiinduló állapotot:
 
 ```bash
-python3 push_config.py inventory.yml configs/baseline.yml
+python push_config.py inventory.yml configs/baseline.yml
 ```
 
 Majd takarítsd a maradékokat az eszközökön (konzol/SSH):

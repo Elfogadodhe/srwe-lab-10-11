@@ -2,7 +2,7 @@
 """A legit áldozat MAC-címét veszi fel a támadó — a port security
 sticky-listája miatt violation lép fel.
 
-Futtatás: sudo python3 mac_spoof.py eth0 00:50:56:AA:BB:01
+Futtatás: sudo python mac_spoof.py eth0 00:50:56:AA:BB:01
 """
 import sys, time
 from scapy.all import Ether, ARP, sendp, conf

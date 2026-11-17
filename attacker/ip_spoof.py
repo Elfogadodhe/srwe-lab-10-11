@@ -3,7 +3,7 @@
 Fontos: a keret a támadó VALÓDI MAC-jét hordozza, de hamis forrás-IP-t —
 a DHCP Snooping önmagában nem fogja meg, csak az IP Source Guard.
 
-Futtatás: sudo python3 ip_spoof.py eth0 10.10.10.50 [dst]
+Futtatás: sudo python ip_spoof.py eth0 10.10.10.50 [dst]
 """
 import sys, time
 from scapy.all import Ether, IP, UDP, sendp, conf

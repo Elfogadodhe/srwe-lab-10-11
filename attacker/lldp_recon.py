@@ -3,7 +3,7 @@
 plusz opcionálisan HAMIS LLDP-bejegyzés injektálása.
 LLDP: IEEE-szabvány, ethertype 0x88CC, multicast 01:80:c2:00:00:0e.
 
-Futtatás: sudo python3 lldp_recon.py eth0 [--inject]
+Futtatás: sudo python lldp_recon.py eth0 [--inject]
 """
 import sys
 from scapy.all import sniff, Ether, sendp, conf

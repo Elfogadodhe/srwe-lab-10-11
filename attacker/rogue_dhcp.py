@@ -2,7 +2,7 @@
 """Hamis DHCP-szerver: az OFFER-ben a támadót adja gateway-nek és DNS-nek.
 DHCP Snooping után ezek az üzenetek eldobódnak az untrusted porton.
 
-Futtatás: sudo python3 rogue_dhcp.py eth0
+Futtatás: sudo python rogue_dhcp.py eth0
 """
 import sys
 from scapy.all import Ether, IP, UDP, BOOTP, DHCP, sendp, sniff, conf

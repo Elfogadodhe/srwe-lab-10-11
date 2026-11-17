@@ -2,7 +2,7 @@
 """MAC flooding: véletlen forrás-MAC-okkal tölti a CAM-táblát.
 A switch egy idő után hub-módba vált, és minden keretet minden portra másol.
 
-Futtatás: sudo python3 mac_flood.py eth0 10000
+Futtatás: sudo python mac_flood.py eth0 10000
 """
 import random, sys
 from scapy.all import Ether, IP, UDP, sendp, conf

@@ -3,7 +3,7 @@
 A második switch a BELSŐ taget értelmezi → a keret bejut a másik VLAN-ba.
 Egyirányú támadás: a válasz nem tud visszajutni.
 
-Futtatás: sudo python3 vlan_double_tag.py eth0 10.20.20.10 [outer] [inner]
+Futtatás: sudo python vlan_double_tag.py eth0 10.20.20.10 [outer] [inner]
 """
 import sys
 from scapy.all import Ether, Dot1Q, IP, ICMP, sendp, conf

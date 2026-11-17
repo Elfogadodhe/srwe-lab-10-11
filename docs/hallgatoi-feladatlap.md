@@ -21,7 +21,7 @@
 
 **Parancs:**
 ```bash
-python3 push_config.py inventory.yml configs/baseline.yml
+python push_config.py inventory.yml configs/baseline.yml
 ```
 
 | Eszköz | IP-cím | SSH-elérés (I/N) | Telnet-elérés (I/N) | Megjegyzés |
@@ -40,7 +40,7 @@ _________________________________________________________________________
 
 ## Fázis 1 – MAC address table overflow (MAC flooding)
 
-**Támadás:** `sudo python3 attacker/mac_flood.py eth0 10000`
+**Támadás:** `sudo python attacker/mac_flood.py eth0 10000`
 
 **Megfigyelés (S1):** `show mac address-table count`
 
@@ -63,7 +63,7 @@ _________________________________________________________________________
 _________________________________________________________________________
 ```
 
-**Védelem:** `python3 push_config.py inventory.yml configs/mitigations.yml port-security`
+**Védelem:** `python push_config.py inventory.yml configs/mitigations.yml port-security`
 
 **Ellenőrzés (S1):** `show port-security` és `show port-security interface fa0/3`
 
@@ -74,7 +74,7 @@ _________________________________________________________________________
 | Violation mód | __________ | __________ |
 | Sticky MAC | __________ | __________ |
 
-**Újratámadás:** `sudo python3 attacker/mac_flood.py eth0 10000`
+**Újratámadás:** `sudo python attacker/mac_flood.py eth0 10000`
 
 **Kérdés:** Miért hiúsult meg most a támadás?
 
@@ -89,7 +89,7 @@ _________________________________________________________________________
 
 ## Fázis 2 – MAC spoofing
 
-**Támadás:** `sudo python3 attacker/mac_spoof.py eth0 <PC-V-MAC>`
+**Támadás:** `sudo python attacker/mac_spoof.py eth0 <PC-V-MAC>`
 
 **Megfigyelés (S1):** `show port-security` + syslog üzenet.
 
@@ -112,7 +112,7 @@ _________________________________________________________________________
 
 ## Fázis 3 – DHCP starvation
 
-**Támadás:** `sudo python3 attacker/dhcp_starve.py eth0 250`
+**Támadás:** `sudo python attacker/dhcp_starve.py eth0 250`
 
 **Megfigyelés (R1):** `show ip dhcp binding`
 
@@ -128,7 +128,7 @@ _________________________________________________________________________
 _________________________________________________________________________
 ```
 
-**Védelem:** `python3 push_config.py inventory.yml configs/mitigations.yml dhcp-snooping`
+**Védelem:** `python push_config.py inventory.yml configs/mitigations.yml dhcp-snooping`
 
 **Ellenőrzés (S1):** `show ip dhcp snooping` és `show ip dhcp snooping binding`
 
@@ -152,7 +152,7 @@ _________________________________________________________________________
 
 ## Fázis 4 – DHCP spoofing (rogue DHCP)
 
-**Támadás:** `sudo python3 attacker/rogue_dhcp.py eth0` — majd PC-V-n: `dhclient -r eth0 && dhclient -v eth0`
+**Támadás:** `sudo python attacker/rogue_dhcp.py eth0` — majd PC-V-n: `dhclient -r eth0 && dhclient -v eth0`
 
 **Megfigyelés (PC-V):** `ip route` és `cat /etc/resolv.conf`
 
@@ -182,13 +182,13 @@ _________________________________________________________________________
 
 ## Fázis 5 – ARP poisoning (kétirányú MITM)
 
-**Támadás:** `sudo python3 attacker/arp_spoof.py eth0 10.10.10.20 10.10.10.1`
+**Támadás:** `sudo python attacker/arp_spoof.py eth0 10.10.10.20 10.10.10.1`
 
 **Megfigyelés (PC-V):** `arp -a | grep 10.10.10.1`
 
 **Kérdés:** Milyen MAC-cím tartozik a gateway-hez? Egyezik-e a támadó MAC-jével? _____
 
-**Védelem:** `python3 push_config.py inventory.yml configs/mitigations.yml dai`
+**Védelem:** `python push_config.py inventory.yml configs/mitigations.yml dai`
 
 **Ellenőrzés (S1):** `show ip arp inspection statistics vlan 10`
 
@@ -211,7 +211,7 @@ _________________________________________________________________________
 
 ## Fázis 6 – STP manipuláció
 
-**Támadás:** `sudo python3 attacker/stp_takeover.py eth0`
+**Támadás:** `sudo python attacker/stp_takeover.py eth0`
 (Alternatíva a megbízhatóság kedvéért: `sudo brctl addbr br0 && sudo brctl setbridgeprio br0 0 && sudo ip link set br0 up`)
 
 **Megfigyelés (S1):** `show spanning-tree root`
@@ -222,7 +222,7 @@ _________________________________________________________________________
 _________________________________________________________________________
 ```
 
-**Védelem:** `python3 push_config.py inventory.yml configs/mitigations.yml stp-guard`
+**Védelem:** `python push_config.py inventory.yml configs/mitigations.yml stp-guard`
 
 **Ellenőrzés (S1):** `show spanning-tree summary` és `show interfaces status err-disabled`
 
@@ -246,7 +246,7 @@ _________________________________________________________________________
 
 ## Fázis 7 – VLAN hopping és DTP
 
-**Felderítés:** `sudo python3 attacker/vlan_hop_recon.py eth0`
+**Felderítés:** `sudo python attacker/vlan_hop_recon.py eth0`
 
 **Kérdés:** Láttál DTP-keretet? Mit jelent ez a port működési módjára nézve?
 
@@ -254,7 +254,7 @@ _________________________________________________________________________
 _________________________________________________________________________
 ```
 
-**Védelem:** `python3 push_config.py inventory.yml configs/mitigations.yml vlan-hop`
+**Védelem:** `python push_config.py inventory.yml configs/mitigations.yml vlan-hop`
 
 **Ellenőrzés (S1):** `show interfaces fa0/3 switchport` és `show interfaces status`
 
@@ -272,7 +272,7 @@ _________________________________________________________________________
 
 ## Fázis 8 – CDP felderítés és Telnet
 
-**Felderítés:** `sudo python3 attacker/cdp_telnet_recon.py eth0 10.0.99.1`
+**Felderítés:** `sudo python attacker/cdp_telnet_recon.py eth0 10.0.99.1`
 
 **Kérdés:** Milyen információkat árult el a CDP a switchről? (Sorolj fel hármat!)
 
@@ -282,7 +282,7 @@ _________________________________________________________________________
 
 **Telnet próba eredménye (baseline-ban):** _______________________
 
-**Védelem:** `python3 push_config.py inventory.yml configs/mitigations.yml hardening`
+**Védelem:** `python push_config.py inventory.yml configs/mitigations.yml hardening`
 
 **Ellenőrzés (S1):** `show cdp`, `show ip ssh`, `show running-config | section line vty`
 
@@ -304,7 +304,7 @@ _________________________________________________________________________
 
 ## Fázis 9 – 802.1Q double-tagging
 
-**Támadás:** `sudo python3 attacker/vlan_double_tag.py eth0 10.20.20.10`
+**Támadás:** `sudo python attacker/vlan_double_tag.py eth0 10.20.20.10`
 
 **Megfigyelés (PC-W, VLAN 20):** `tcpdump -i eth0 icmp`
 
@@ -317,7 +317,7 @@ _________________________________________________________________________
 _________________________________________________________________________
 ```
 
-**Védelem:** `python3 push_config.py inventory.yml configs/mitigations.yml native-vlan-hardening`
+**Védelem:** `python push_config.py inventory.yml configs/mitigations.yml native-vlan-hardening`
 
 **Ellenőrzés (S1):** `show interfaces trunk` — Natív VLAN előtte / utána: ______ / ______
 
@@ -340,7 +340,7 @@ _________________________________________________________________________
 
 ## Fázis 10 – IP spoofing
 
-**Támadás:** `sudo python3 attacker/ip_spoof.py eth0 10.10.10.50`
+**Támadás:** `sudo python attacker/ip_spoof.py eth0 10.10.10.50`
 
 **Kérdés:** A hamis 10.10.10.50 szerepel-e a DHCP snooping binding táblában? _____
 
@@ -351,7 +351,7 @@ _________________________________________________________________________
 _________________________________________________________________________
 ```
 
-**Védelem (csak a dhcp-snooping után!):** `python3 push_config.py inventory.yml configs/mitigations.yml ip-source-guard`
+**Védelem (csak a dhcp-snooping után!):** `python push_config.py inventory.yml configs/mitigations.yml ip-source-guard`
 
 **Ellenőrzés (S1):** `show ip verify source` és `show ip source binding`
 
@@ -373,7 +373,7 @@ _________________________________________________________________________
 
 ## Fázis 11 – LLDP felderítés
 
-**Felderítés:** `sudo python3 attacker/lldp_recon.py eth0 --inject`
+**Felderítés:** `sudo python attacker/lldp_recon.py eth0 --inject`
 
 **Kérdés:** Láttál LLDPDU-t? Mit árul el az LLDP a hálózatról? (Három elem!)
 
@@ -381,7 +381,7 @@ _________________________________________________________________________
 1. ______________________________  2. ______________________________  3. ______________________________
 ```
 
-**Védelem:** `python3 push_config.py inventory.yml configs/mitigations.yml lldp-hardening`
+**Védelem:** `python push_config.py inventory.yml configs/mitigations.yml lldp-hardening`
 
 **Ellenőrzés (S1):** `show lldp interface FastEthernet0/1` — Tx: _____ Rx: _____
 
@@ -406,11 +406,11 @@ _________________________________________________________________________
 _________________________________________________________________________
 ```
 
-**Támadás:** `sudo python3 attacker/icmp_redirect.py eth0 10.10.10.20 10.10.10.1`
+**Támadás:** `sudo python attacker/icmp_redirect.py eth0 10.10.10.20 10.10.10.1`
 
 **Megfigyelés (PC-V):** `ip route get 8.8.8.8` — Települt-e a támadón át vezető route? _____
 
-**Védelem:** `python3 push_config.py inventory.yml configs/mitigations.yml icmp-redirect`
+**Védelem:** `python push_config.py inventory.yml configs/mitigations.yml icmp-redirect`
 
 **Ellenőrzés (R1):** `show ip interface GigabitEthernet0/1.10 | include redirects` — Kimenet: _______________
 
@@ -435,7 +435,7 @@ _________________________________________________________________________
 ## Automatikus ellenőrzés (a labor végén)
 
 ```bash
-python3 verify.py inventory.yml
+python verify.py inventory.yml
 ```
 
 **Eredmények átmásolása** (a `verify.py` 27 ellenőrzést futtat mind a 12 támadás ellen; az alábbi sorok ezek csoportjai):

@@ -2,7 +2,7 @@
 """0 prioritású BPDU-k küldése — a támadó igyekszik root bridge-gé válni.
 A BPDU Guard emiatt err-disabled állapotba teszi a portot.
 
-Futtatás: sudo python3 stp_takeover.py eth0
+Futtatás: sudo python stp_takeover.py eth0
 Alternatíva (megbízhatóbb): sudo brctl addbr br0 && sudo brctl setbridgeprio br0 0
                             && sudo ip link set br0 up
 """

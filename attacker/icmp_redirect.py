@@ -2,7 +2,7 @@
 """Gateway MITM ICMP Redirect-del: az áldozatnak azt hazudjuk, hogy a gateway
 a támadón át érhető el egy adott cél felé.
 
-Futtatás: sudo python3 icmp_redirect.py eth0 <victim_ip> <gateway_ip> [prefix]
+Futtatás: sudo python icmp_redirect.py eth0 <victim_ip> <gateway_ip> [prefix]
 Megjegyzés: a demonstrációhoz az áldozat VM-en engedélyezni kell:
   sysctl -w net.ipv4.conf.eth0.accept_redirects=1
 (a modern alapértelmezés tiltja — ez maga is tanulság!)

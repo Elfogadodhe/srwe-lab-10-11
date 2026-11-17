@@ -55,7 +55,7 @@ pip install netmiko pyyaml scapy
 
 ```bash
 # Először csak egy eszközre (S1)
-python3 push_config.py inventory.yml configs/baseline.yml S1-only
+python push_config.py inventory.yml configs/baseline.yml S1-only
 # Ellenőrzés
 ssh admin@10.0.99.1
 # show running-config | section line vty
@@ -190,11 +190,11 @@ ssh admin@10.0.99.1
 #!/bin/bash
 # CI pipeline példány
 echo "=== SRWE Labor Automatizált Értékelés ==="
-python3 push_config.py inventory.yml configs/baseline.yml
+python push_config.py inventory.yml configs/baseline.yml
 sleep 30
 ./run_attacks.sh          # automatikus támadás-futtatás
 sleep 30
-python3 verify.py inventory.yml --json eredmeny.json
+python verify.py inventory.yml --json eredmeny.json
 cat eredmeny.json | jq '.score.percent'
 ```
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Kimeríti a DHCP-poolt egyedi ügyfél-MAC-okkal küldött DISCOVER-ekkel.
 
-Futtatás: sudo python3 dhcp_starve.py eth0 250
+Futtatás: sudo python dhcp_starve.py eth0 250
 """
 import random, struct, sys
 from scapy.all import Ether, IP, UDP, BOOTP, DHCP, sendp, conf

@@ -1,6 +1,6 @@
 # AI-Instrukció: SRWE M10–11 Laborfeladat Automatizált Előállítása
 
-*Dokumentum-verzió: v2.8 | Utolsó frissítés: 2026-11-17*
+*Dokumentum-verzió: v2.9 | Utolsó frissítés: 2026-11-17*
 
 ## RÉSZ 0 — KIEGÉSZÍTŐ TÁMADÁSI JAVASLATOK (bővítési roadmap)
 
@@ -46,7 +46,7 @@ A támadó 255-ös prioritású HSRP Hello-kat küld a virtuális IP-re, átvesz
 ```python
 #!/usr/bin/env python3
 """HSRP takeover: maximális (255) prioritású Hello-val átveszi az Active gateway-t.
-Futtatás: sudo python3 hsrp_hijack.py eth0 10.10.10.1 10.10.10.254
+Futtatás: sudo python hsrp_hijack.py eth0 10.10.10.1 10.10.10.254
     argv1=iface, argv2=virtuális IP (VIP), argv3=támadó valós IP
 """
 import sys
@@ -75,7 +75,7 @@ A támadó hamis RA-kat szór, saját magát hirdeti IPv6 default routerként (�
 ```python
 #!/usr/bin/env python3
 """Rogue IPv6 Router Advertisement: a támadót hirdeti default IPv6 gateway-ként.
-Futtatás: sudo python3 ipv6_ra_spoof.py eth0
+Futtatás: sudo python ipv6_ra_spoof.py eth0
 """
 import sys
 from scapy.all import Ether, IPv6, sendp, conf
@@ -105,7 +105,7 @@ Két változat: (a) *starvation* — tömeges `Solicit` különböző DUID-okkal
 ```python
 #!/usr/bin/env python3
 """DHCPv6 starvation: sok véletlen DUID-dal Solicit-ot küld, kimeríti a poolt.
-Futtatás: sudo python3 dhcpv6_starve.py eth0 5000
+Futtatás: sudo python dhcpv6_starve.py eth0 5000
 """
 import sys, random
 from scapy.all import Ether, IPv6, UDP, sendp, conf
@@ -144,7 +144,7 @@ A támadó egy a jelenleginél **magasabb revíziószámú** VTP subset-advertis
 #!/usr/bin/env python3
 """VTP injection váz: magas revíziószámú VTP subset advertisement a trunkön.
 MEGJEGYZÉS: trunk-portra kötött attacker és egyező VTP-domain kell hozzá.
-Futtatás: sudo python3 vtp_inject.py eth0 LABDOMAIN 999
+Futtatás: sudo python vtp_inject.py eth0 LABDOMAIN 999
 """
 import sys
 from scapy.all import Ether, Dot3, LLC, SNAP, sendp, conf
@@ -241,7 +241,7 @@ srwe-lab/
 
 ---
 
-*Dokumentum-verzió: v2.8 | Utolsó frissítés: 2026-11-17*
+*Dokumentum-verzió: v2.9 | Utolsó frissítés: 2026-11-17*
 
 ---
 
@@ -249,6 +249,7 @@ srwe-lab/
 
 > Munkamenetre vonatkozó változásnapló. Minden módosítás timestamp-pel (ÉÉÉÉ-HH-NN).
 
+- **2026-11-17:** **`push_config.py` hiba javítva + egységes `python` parancs.** (1) A `push_config.py` eddig csak a **szekciós** `mitigations.yml`-t (szekció → eszköz → konfig) kezelte; a **lapos** `baseline.yml`-re (eszköz → konfig, top-level S1/S2/R1) `KeyError: 'global'`-lal elszállt (traceback a 95→85→26 sorokon). Hozzáadva a `CONFIG_KEYS` + `is_device_cfg()` automatikus szerkezet-felismerés és egy inventory-eszköznév őrszem; a `main()` mindkét szerkezetet egységes (szekció, eszköz, konfig) listává normalizálja, a szűrő lapos fájlnál eszköznévre, szekciósnál szekciónévre hat. Egységteszttel ellenőrizve (baseline → S1/S2/R1; mitigations → 19 szekció×eszköz, mind valid; szűrés OK). A könyv §17 beágyazott másolata szinkronizálva a javított fájllal. (2) **Egységes `python` parancs minden rendszeren:** ellenőrizve, hogy a `python` Linuxon is működik; a könyv és az összes doksi (`hallgatoi-feladatlap.md`, `index-es-deploy-checklist.md`, `AI-instrukcio.md`, `verify.py`, `attacker/*.py`, `push_config.py`) parancs-invokációi `python3 …` → `python …`-ra váltva (a shebangok `#!/usr/bin/env python3` és az apt **csomagnevek** érintetlenek). A Linux-telepítőbe bekerült a `python-is-python3` csomag (ez adja a `python` parancsot Ubuntu/Debianon), és a §7 parancsnév-megjegyzés egységesítve; megmaradt a Windows- (MS Store → `py`) és Linux- (`python3 -m venv` egyszeri) tartalék-tipp. Instrukció v2.9-re frissítve.
 - **2026-11-17:** **IP-átfedés javítva.** R1-nek korábban két interfésze is a `10.0.99.0/24` (VLAN 99) alhálózatban volt — `Gi0/0` = `.254` és `Gi0/1.99` = `.253` —, amit a valódi Cisco IOS „% overlaps with GigabitEthernet0/0" hibával elutasít. A felesleges `Gi0/0` interfész eltávolítva (`baseline.yml` R1-blokkja és a könyv §15 reprodukciója); a VLAN 99 átjáró ezentúl egyedül a `Gi0/1.99`-en van, **`.254`** címen (ez egyezik a switchek `default-gateway`-ével és az `inventory.yml` R1-host címével) — tiszta router-on-a-stick, egyetlen `Gi0/1` trunkkel. Frissítve a §12 Mermaid-ábra (törölve a `Gi0/0` él és csomópont-sor), az interfész- és VLAN-táblázat, valamint a jelmagyarázat. YAML újravalidálva, Mermaid újrarenderelve. Instrukció v2.8-ra frissítve.
 - **2026-11-17:** A könyv **12. fejezetének** (Topológia és címzés) szöveges ASCII-ábrája lecserélve **Mermaid-diagramra** (markdownban/GitHubon renderelhető), amely **minden interfészt** tartalmaz (R1 Gi0/0, Gi0/1 trunk + Gi0/1.10/.20/.99 alinterfészek; S1/S2 SVI + Fa0/1-3, Fa0/24; PC-A/PC-V/ATTACKER/PC-W NIC), VLAN-onkénti csoportosításban, trunk/access/menedzsment kapcsolatok megkülönböztetésével. Hozzáadva két **IP-címzési táblázat** (interfészenkénti + VLAN-összefoglaló) és egy DHCP-megjegyzés; az adatok az `inventory.yml` és a `configs/baseline.yml` alapján. A Mermaid-szintaxis külső rendererrel (mermaid.ink) validálva. **Windows-javítás:** a `python3` Windowson gyakran a Microsoft Store-t nyitja meg, ezért Windowson a `py` indító ajánlott (`py …`, `py -m pip …`, `py -m venv …`); a parancsnév-megjegyzés operációs rendszerenként egyértelműsítve: **`py` = csak Windows**, **`python3`/`pip` = macOS/Linux** (a `py` ott nem létezik). Frissítve a parancsnév-megjegyzés és a 7. fejezet Windows-ellenőrzése. Instrukció v2.7-re frissítve.
 - **2026-11-12:** Az instrukciós dokumentumból eltávolítva minden audit-tartalom: a **RÉSZ 2 — ELLENŐRZÉSI PROTOKOLL** és a **RÉSZ 3 — A JELEN CSOMAG AUDIT EREDMÉNYE** szekciók törölve, a lábléc „Audit módszer" része és a bevezető ellenőrzőlista-utalása szintén. A fájl átnevezve `AI-instrukcio.md`-re (a név már nem utal auditra); a README és a könyv hivatkozásai frissítve. A `verify.py` leírása a RÉSZ 1-ben a jegy/pont nélküli (Pipa/Hiba) viselkedésre igazítva. A megmaradt tartalom: RÉSZ 0 (bővítési roadmap), RÉSZ 1 (reprodukciós instrukció), VÁLTOZÁSNAPLÓ. A két forrásdokumentum (`mester-labor-dokumentacio.md`, `vegigvezetes-labor-felallitas.md`) törölve, mert tartalmuk teljesen beolvadt az összevont könyvbe. Instrukció v2.6-ra frissítve.
