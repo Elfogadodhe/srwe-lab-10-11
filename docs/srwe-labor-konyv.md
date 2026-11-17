@@ -192,13 +192,15 @@ sudo apt install -y python3 python3-pip python3-venv
 python3 --version
 ```
 
-> **Megjegyzés a parancsnevekről (különösen Windowson):** a könyv a `python3` / `pip` alakot használja (ez macOS/Linuxon a megszokott). **Windowson viszont a `python3` gyakran nem a Pythont futtatja, hanem megnyitja a Microsoft Store-t** — ezért Windowson a megbízható parancs a **`py`** (a hivatalos telepítővel települő Python-indító, ami akkor is működik, ha a `python`/`python3` nincs a PATH-ban). Tehát Windowson:
+> **Megjegyzés a parancsnevekről — operációs rendszerenként.** A könyv végig a `python3` / `pip` alakot írja. Ezt a saját rendszered szerint fordítsd le:
 >
-> * `python3 …` helyett → **`py …`** (pl. `py --version`, `py -m venv .venv`, `py push_config.py …`, `py verify.py …`)
+> * **macOS és Linux:** használd pontosan úgy, ahogy a könyvben áll: **`python3`** és **`pip`** (a `py` parancs ezeken a rendszereken **nem létezik**, ne azt írd).
 >
-> * `pip …` helyett → **`py -m pip …`** (pl. `py -m pip install -r requirements.txt`)
+> * **Windows:** a `python3` gyakran nem a Pythont futtatja, hanem **megnyitja a Microsoft Store-t**. Ezért Windowson a megbízható indító a **`py`** (ez a hivatalos telepítővel jön, és akkor is működik, ha a `python`/`python3` nincs a PATH-ban). Windowson tehát:
+>     * `python3 …` helyett → **`py …`** (pl. `py --version`, `py -m venv .venv`, `py push_config.py …`, `py verify.py …`)
+>     * `pip …` helyett → **`py -m pip …`** (pl. `py -m pip install -r requirements.txt`)
 >
-> macOS/Linuxon maradj a `python3` / `pip` alaknál.
+> Röviden: **`py` = csak Windows**, **`python3` = macOS/Linux**.
 
 ## 8\. A projektmappa létrehozása VSCode-ban
 
