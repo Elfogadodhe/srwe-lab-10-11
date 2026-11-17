@@ -1392,6 +1392,8 @@ hostname R1
 ip domain-name lab.local
 username admin privilege 15 secret cisco123
 crypto key generate rsa modulus 2048
+interface GigabitEthernet 0/1
+ no shutdown
 interface GigabitEthernet 0/1.99
  encapsulation dot1Q 99
  ip address 10.0.99.254 255.255.255.0
@@ -1411,9 +1413,17 @@ hostname S1
 ip domain-name lab.local
 username admin privilege 15 secret cisco123
 crypto key generate rsa modulus 2048
+vlan 99
 interface vlan 99
  ip address 10.0.99.1 255.255.255.0
  no shutdown
+interface FastEthernet 0/2
+ switchport mode access
+ swtichport access vlan 99
+interface FastEthernet 0/24
+ switchpot mode trunk
+interface GigabitEthernet 0/1
+ switchport mode trunk
 exit
 line vty 0 4
  login local
@@ -1429,9 +1439,12 @@ hostname S2
 ip domain-name lab.local
 username admin privilege 15 secret cisco123
 crypto key generate rsa modulus 2048
+vlan 99
 interface vlan 99
  ip address 10.0.99.2 255.255.255.0
  no shutdown
+interface FastEthernet 0/24
+ switchpot mode trunk
 exit
 line vty 0 4
  login local
