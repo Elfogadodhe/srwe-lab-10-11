@@ -1,6 +1,6 @@
 # AI-Instrukció: SRWE M10–11 Laborfeladat Automatizált Előállítása
 
-*Dokumentum-verzió: v2.7 | Utolsó frissítés: 2026-11-17*
+*Dokumentum-verzió: v2.8 | Utolsó frissítés: 2026-11-17*
 
 ## RÉSZ 0 — KIEGÉSZÍTŐ TÁMADÁSI JAVASLATOK (bővítési roadmap)
 
@@ -241,7 +241,7 @@ srwe-lab/
 
 ---
 
-*Dokumentum-verzió: v2.7 | Utolsó frissítés: 2026-11-17*
+*Dokumentum-verzió: v2.8 | Utolsó frissítés: 2026-11-17*
 
 ---
 
@@ -249,6 +249,7 @@ srwe-lab/
 
 > Munkamenetre vonatkozó változásnapló. Minden módosítás timestamp-pel (ÉÉÉÉ-HH-NN).
 
+- **2026-11-17:** **IP-átfedés javítva.** R1-nek korábban két interfésze is a `10.0.99.0/24` (VLAN 99) alhálózatban volt — `Gi0/0` = `.254` és `Gi0/1.99` = `.253` —, amit a valódi Cisco IOS „% overlaps with GigabitEthernet0/0" hibával elutasít. A felesleges `Gi0/0` interfész eltávolítva (`baseline.yml` R1-blokkja és a könyv §15 reprodukciója); a VLAN 99 átjáró ezentúl egyedül a `Gi0/1.99`-en van, **`.254`** címen (ez egyezik a switchek `default-gateway`-ével és az `inventory.yml` R1-host címével) — tiszta router-on-a-stick, egyetlen `Gi0/1` trunkkel. Frissítve a §12 Mermaid-ábra (törölve a `Gi0/0` él és csomópont-sor), az interfész- és VLAN-táblázat, valamint a jelmagyarázat. YAML újravalidálva, Mermaid újrarenderelve. Instrukció v2.8-ra frissítve.
 - **2026-11-17:** A könyv **12. fejezetének** (Topológia és címzés) szöveges ASCII-ábrája lecserélve **Mermaid-diagramra** (markdownban/GitHubon renderelhető), amely **minden interfészt** tartalmaz (R1 Gi0/0, Gi0/1 trunk + Gi0/1.10/.20/.99 alinterfészek; S1/S2 SVI + Fa0/1-3, Fa0/24; PC-A/PC-V/ATTACKER/PC-W NIC), VLAN-onkénti csoportosításban, trunk/access/menedzsment kapcsolatok megkülönböztetésével. Hozzáadva két **IP-címzési táblázat** (interfészenkénti + VLAN-összefoglaló) és egy DHCP-megjegyzés; az adatok az `inventory.yml` és a `configs/baseline.yml` alapján. A Mermaid-szintaxis külső rendererrel (mermaid.ink) validálva. **Windows-javítás:** a `python3` Windowson gyakran a Microsoft Store-t nyitja meg, ezért Windowson a `py` indító ajánlott (`py …`, `py -m pip …`, `py -m venv …`); a parancsnév-megjegyzés operációs rendszerenként egyértelműsítve: **`py` = csak Windows**, **`python3`/`pip` = macOS/Linux** (a `py` ott nem létezik). Frissítve a parancsnév-megjegyzés és a 7. fejezet Windows-ellenőrzése. Instrukció v2.7-re frissítve.
 - **2026-11-12:** Az instrukciós dokumentumból eltávolítva minden audit-tartalom: a **RÉSZ 2 — ELLENŐRZÉSI PROTOKOLL** és a **RÉSZ 3 — A JELEN CSOMAG AUDIT EREDMÉNYE** szekciók törölve, a lábléc „Audit módszer" része és a bevezető ellenőrzőlista-utalása szintén. A fájl átnevezve `AI-instrukcio.md`-re (a név már nem utal auditra); a README és a könyv hivatkozásai frissítve. A `verify.py` leírása a RÉSZ 1-ben a jegy/pont nélküli (Pipa/Hiba) viselkedésre igazítva. A megmaradt tartalom: RÉSZ 0 (bővítési roadmap), RÉSZ 1 (reprodukciós instrukció), VÁLTOZÁSNAPLÓ. A két forrásdokumentum (`mester-labor-dokumentacio.md`, `vegigvezetes-labor-felallitas.md`) törölve, mert tartalmuk teljesen beolvadt az összevont könyvbe. Instrukció v2.6-ra frissítve.
 - **2026-11-10:** A repó mostantól minden labor-fájlt tartalmaz, kézzel semmit nem kell létrehozni. Kinyerve és commitolva: `inventory.yml`, `configs/baseline.yml`, `configs/mitigations.yml`, `push_config.py`, valamint az `attacker/` mappa 12 szkriptje (mac_flood, mac_spoof, dhcp_starve, rogue_dhcp, arp_spoof, stp_takeover, vlan_hop_recon, cdp_telnet_recon, vlan_double_tag, ip_spoof, lldp_recon, icmp_redirect). Új `requirements.txt` (netmiko, pyyaml, scapy); a könyv 10. fejezetében ez az **1. (ajánlott) telepítési opció** (`pip install -r requirements.txt`). A `verify.py` átírva: **nem ad jegyet és nem pontoz**, csak ellenőrzi a beállításokat (Pipa/Hiba/SKIP, kilépési kód 0, ha minden átment); a jegy/pont-táblázat eltávolítva a szkriptből és a könyvből. A könyvben az áldozat gép lehet **Windows is, Wireshark-kal** (nem csak Linux+tcpdump): a IV. rész bevezetőjében és az érintett fázisoknál Wireshark-szűrők (`arp`, `icmp`, `bootp`, `ip.src`) és Windows-parancsok (`ipconfig /release|/renew`, `arp -a`) megadva. A felhasználó kézi markdown-formázási módosításai megőrizve. Instrukció v2.5-re frissítve.

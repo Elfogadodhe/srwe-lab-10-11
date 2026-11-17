@@ -74,10 +74,8 @@ S2:
 R1:
   global:
     - hostname R1
-    - interface GigabitEthernet0/0
-    - ip address 10.0.99.254 255.255.255.0
-    - no shutdown
-    - exit
+    # Router-on-a-stick: R1 egyetlen trunk-kapcsolaton (Gi0/1) éri el az összes VLAN-t.
+    # A VLAN 99 (menedzsment) átjárója a Gi0/1.99 .254-en — ez a switchek default-gateway-e.
     - interface GigabitEthernet0/1
     - no shutdown
     - exit
@@ -91,7 +89,7 @@ R1:
     - exit
     - interface GigabitEthernet0/1.99
     - encapsulation dot1Q 99
-    - ip address 10.0.99.253 255.255.255.0
+    - ip address 10.0.99.254 255.255.255.0
     - exit
     # NINCS 'no ip redirects' — az ICMP-redirect támadás (12. fázis) miatt
   dhcp_pool:

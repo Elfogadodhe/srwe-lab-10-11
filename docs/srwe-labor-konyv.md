@@ -332,11 +332,10 @@ graph TD
     subgraph VLAN20["Test &middot; VLAN 20 &middot; 10.20.20.0/24"]
         PCW["PC-W: double-tag cél<br/>NIC 10.20.20.0/24"]
     end
-    R1["R1: router-on-a-stick + DHCP<br/>Gi0/0 10.0.99.254 mgmt GW<br/>Gi0/1.10 10.10.10.1<br/>Gi0/1.20 10.20.20.1<br/>Gi0/1.99 10.0.99.253"]
+    R1["R1: router-on-a-stick + DHCP<br/>Gi0/1.10 10.10.10.1<br/>Gi0/1.20 10.20.20.1<br/>Gi0/1.99 10.0.99.254 mgmt GW"]
     S1["S1 switch<br/>SVI VLAN99 10.0.99.1"]
     S2["S2 switch<br/>SVI VLAN99 10.0.99.2"]
     R1 ===|"Gi0/1 trunk VLAN 10,20,99"| S1
-    R1 -.->|"Gi0/0 mgmt access VLAN 99"| S1
     S1 ===|"Fa0/24 trunk VLAN 10,20,99"| S2
     PCV ---|"S1 Fa0/1 access VLAN 10"| S1
     PCA ---|"S1 Fa0/2 access VLAN 99"| S1
@@ -344,17 +343,16 @@ graph TD
     PCW ---|"S2 Fa0/1 access VLAN 20"| S2
 ```
 
-> Az ábra **Mermaid** formátumú, ezért a GitHubon és a legtöbb Markdown-nézegetőben (VSCode Markdown-előnézet Mermaid-támogatással, Obsidian, GitLab) **renderelt ábraként** jelenik meg. A `===` a trunk, a `-.->` a dedikált menedzsment-kapcsolat, a sima vonal pedig az access-port.
+> Az ábra **Mermaid** formátumú, ezért a GitHubon és a legtöbb Markdown-nézegetőben (VSCode Markdown-előnézet Mermaid-támogatással, Obsidian, GitLab) **renderelt ábraként** jelenik meg. A `===` a trunk-kapcsolat (VLAN 10, 20, 99), a sima vonal pedig az access-port. R1 **router-on-a-stick** módban, egyetlen `Gi0/1` trunkön keresztül látja el az összes VLAN átjárószerepét (a menedzsment VLAN 99-et is).
 
 ### Interfészek és IP-címzés
 
 | Eszköz | Interfész | VLAN / típus | IP-cím | Szerep |
 |---|---|---|---|---|
-| **R1** | Gi0/0 | VLAN 99 (access) | `10.0.99.254/24` | A switchek default-gateway-e (menedzsment) |
 | **R1** | Gi0/1 | trunk (szülő) | — (nincs IP) | Router-on-a-stick trunk S1 felé |
 | **R1** | Gi0/1.10 | VLAN 10 (dot1Q) | `10.10.10.1/24` | VLAN 10 átjáró + DHCP-kiszolgáló |
 | **R1** | Gi0/1.20 | VLAN 20 (dot1Q) | `10.20.20.1/24` | VLAN 20 átjáró |
-| **R1** | Gi0/1.99 | VLAN 99 (dot1Q) | `10.0.99.253/24` | VLAN 99 inter-VLAN routing |
+| **R1** | Gi0/1.99 | VLAN 99 (dot1Q) | `10.0.99.254/24` | VLAN 99 átjáró = a switchek default-gateway-e (menedzsment) |
 | **S1** | SVI VLAN 99 | VLAN 99 | `10.0.99.1/24` | S1 menedzsment-IP (SSH / netmiko) |
 | **S1** | Fa0/1 | VLAN 10 (access) | — | PC-V (áldozat) |
 | **S1** | Fa0/2 | VLAN 99 (access) | — | PC-A (admin / netmiko) |
@@ -374,7 +372,7 @@ graph TD
 |---|---|---|---|
 | **10** | User (áldozat + támadó) | `10.10.10.0/24` | `10.10.10.1` (R1 Gi0/1.10) |
 | **20** | Test (double-tag cél) | `10.20.20.0/24` | `10.20.20.1` (R1 Gi0/1.20) |
-| **99** | Menedzsment | `10.0.99.0/24` | `10.0.99.254` (R1 Gi0/0) |
+| **99** | Menedzsment | `10.0.99.0/24` | `10.0.99.254` (R1 Gi0/1.99) |
 
 > **DHCP:** a VLAN 10 pool (`USERS`) a `10.10.10.0/24` hálózatot osztja; a `10.10.10.1`–`10.10.10.10` tartomány kizárva (statikus/átjáró), így a PC-V a `.11`-től felfelé kap címet.
 
@@ -535,10 +533,8 @@ S2:
 R1:
   global:
     - hostname R1
-    - interface GigabitEthernet0/0
-    - ip address 10.0.99.254 255.255.255.0
-    - no shutdown
-    - exit
+    # Router-on-a-stick: R1 egyetlen trunk-kapcsolaton (Gi0/1) éri el az összes VLAN-t.
+    # A VLAN 99 (menedzsment) átjárója a Gi0/1.99 .254-en — ez a switchek default-gateway-e.
     - interface GigabitEthernet0/1
     - no shutdown
     - exit
@@ -552,7 +548,7 @@ R1:
     - exit
     - interface GigabitEthernet0/1.99
     - encapsulation dot1Q 99
-    - ip address 10.0.99.253 255.255.255.0
+    - ip address 10.0.99.254 255.255.255.0
     - exit
     # NINCS 'no ip redirects' — az ICMP-redirect támadás (12. fázis) miatt
   dhcp_pool:
