@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """verify.py — Automatizált védelem-ellenőrző a SRWE 10–11 laborhoz.
 
-27 ellenőrzés mind a 12 támadás ellen. A szkript NEM ad jegyet és NEM
-pontoz — csak leellenőrzi, hogy minden védelmi beállítás a helyén van-e,
+27 ellenőrzés mind a 12 támadás ellen. A szkript csak leellenőrzi, hogy minden védelmi beállítás a helyén van-e,
 és felsorolja, melyik ellenőrzés ment át (Pipa) és melyik nem (Hiba).
 
 Használat:
@@ -15,6 +14,7 @@ Függőségek: pip install netmiko pyyaml
 Kilépési kód: 0 ha minden (elérhető eszközön futtatott) ellenőrzés átment,
 1 ha legalább egy megbukott (CI-barát).
 """
+
 import argparse
 import json
 import re
@@ -24,11 +24,14 @@ from datetime import datetime
 import yaml
 from netmiko import ConnectHandler
 from netmiko.exceptions import NetmikoAuthenticationException, NetmikoTimeoutException
+from paramiko.ssh_exception import SSHException
 
 
-# ============================================================================
-# ELLENŐRZÉSI DEFINÍCIÓK
-# ============================================================================
+def connect(params):
+    try:
+        return ConnectHandler(**params), None
+    except (NetmikoTimeoutException, NetmikoAuthenticationException, SSHException) as e:
+        return None, str(e)
 # expect: (regex, kell_illeszkedni) lista
 #   (pattern, True)  -> a kimenetben KELL szerepelnie
 #   (pattern, False) -> a kimenetben NEM SZABAD szerepelnie
@@ -40,8 +43,11 @@ CHECKS = [
         "id": "s1-portsec-status",
         "device": "S1",
         "cmd": "show port-security",
-        "expect": [(r"SecurePort\s+MaxSecureAddr\s+CurrentAddr", True),
-                   (r"Fa0/1", True), (r"Fa0/3", True)],
+        "expect": [
+            (r"SecurePort\s+MaxSecureAddr\s+CurrentAddr", True),
+            (r"Fa0/1", True),
+            (r"Fa0/3", True),
+        ],
         "points": 8,
         "attack": "1-2. MAC flooding / MAC spoofing",
     },
@@ -49,9 +55,11 @@ CHECKS = [
         "id": "s1-portsec-attacker-shutdown",
         "device": "S1",
         "cmd": "show port-security interface fa0/3",
-        "expect": [(r"Port Security\s*:\s*Enabled", True),
-                   (r"Violation Mode\s*:\s*Shutdown", True),
-                   (r"Maximum MAC Addresses\s*:\s*1", True)],
+        "expect": [
+            (r"Port Security\s*:\s*Enabled", True),
+            (r"Violation Mode\s*:\s*Shutdown", True),
+            (r"Maximum MAC Addresses\s*:\s*1", True),
+        ],
         "points": 8,
         "attack": "1-2. MAC flooding / MAC spoofing",
     },
@@ -59,8 +67,10 @@ CHECKS = [
         "id": "s1-portsec-sticky",
         "device": "S1",
         "cmd": "show port-security interface fa0/1",
-        "expect": [(r"Port Security\s*:\s*Enabled", True),
-                   (r"Sticky MAC Addresses\s*:\s*[1-9]", True)],
+        "expect": [
+            (r"Port Security\s*:\s*Enabled", True),
+            (r"Sticky MAC Addresses\s*:\s*[1-9]", True),
+        ],
         "points": 5,
         "attack": "2. MAC spoofing",
     },
@@ -68,18 +78,22 @@ CHECKS = [
         "id": "s2-portsec-status",
         "device": "S2",
         "cmd": "show port-security",
-        "expect": [(r"SecurePort\s+MaxSecureAddr\s+CurrentAddr", True), (r"Fa0/1", True)],
+        "expect": [
+            (r"SecurePort\s+MaxSecureAddr\s+CurrentAddr", True),
+            (r"Fa0/1", True),
+        ],
         "points": 4,
         "attack": "1-2. MAC flooding / MAC spoofing",
     },
-
     # ---------- 3-4. DHCP starvation / spoofing -> DHCP SNOOPING ----------
     {
         "id": "s1-dhcp-snooping-enabled",
         "device": "S1",
         "cmd": "show ip dhcp snooping",
-        "expect": [(r"Switch DHCP snooping is Enabled", True),
-                   (r"(?s)configured on following VLANs:\s*\n?\s*[\d,\-\s]*\b10\b", True)],
+        "expect": [
+            (r"Switch DHCP snooping is Enabled", True),
+            (r"(?s)configured on following VLANs:\s*\n?\s*[\d,\-\s]*\b10\b", True),
+        ],
         "points": 8,
         "attack": "3-4. DHCP starvation / spoofing",
     },
@@ -95,7 +109,7 @@ CHECKS = [
         "id": "s1-dhcp-rate-limit",
         "device": "S1",
         "cmd": "show ip dhcp snooping",
-        "expect": [(r"Fa0/3\s+\S+\s+\d+", True)],   # rate limit, nem 'unlimited'
+        "expect": [(r"Fa0/3\s+\S+\s+\d+", True)],  # rate limit, nem 'unlimited'
         "points": 6,
         "attack": "3. DHCP starvation",
     },
@@ -103,11 +117,13 @@ CHECKS = [
         "id": "s2-dhcp-snooping",
         "device": "S2",
         "cmd": "show ip dhcp snooping",
-        "expect": [(r"Switch DHCP snooping is Enabled", True), (r"Fa0/24\s+trust", True)],
+        "expect": [
+            (r"Switch DHCP snooping is Enabled", True),
+            (r"Fa0/24\s+trust", True),
+        ],
         "points": 4,
         "attack": "3-4. DHCP starvation / spoofing",
     },
-
     # ---------- 5. ARP poisoning -> DAI ------------------------------------
     {
         "id": "s1-dai-vlan10",
@@ -133,7 +149,6 @@ CHECKS = [
         "points": 4,
         "attack": "5. ARP poisoning",
     },
-
     # ---------- 6. STP manipuláció -> BPDU/ROOT GUARD ----------------------
     {
         "id": "s1-bpduguard",
@@ -153,14 +168,15 @@ CHECKS = [
         "points": 5,
         "attack": "6. STP manipuláció",
     },
-
     # ---------- 7. VLAN hopping (DTP) --------------------------------------
     {
         "id": "s1-no-dtp-access",
         "device": "S1",
         "cmd": "show interfaces fa0/3 switchport",
-        "expect": [(r"Operational Mode:\s*static access", True),
-                   (r"Negotiation of Trunking:\s*Off", True)],
+        "expect": [
+            (r"Operational Mode:\s*static access", True),
+            (r"Negotiation of Trunking:\s*Off", True),
+        ],
         "points": 8,
         "attack": "7. VLAN hopping (DTP)",
     },
@@ -172,7 +188,6 @@ CHECKS = [
         "points": 4,
         "attack": "7. VLAN hopping (DTP)",
     },
-
     # ---------- 8. CDP felderítés + Telnet -> HARDENING ---------------------
     {
         "id": "s1-cdp-off",
@@ -194,8 +209,7 @@ CHECKS = [
         "id": "s1-vty-ssh-only",
         "device": "S1",
         "cmd": "show running-config | section line vty",
-        "expect": [(r"transport input ssh", True),
-                   (r"transport input telnet", False)],
+        "expect": [(r"transport input ssh", True), (r"transport input telnet", False)],
         "points": 4,
         "attack": "8. Telnet / gyenge elérés",
     },
@@ -211,11 +225,13 @@ CHECKS = [
         "id": "s2-vty-ssh-only",
         "device": "S2",
         "cmd": "show running-config | section line vty",
-        "expect": [(r"transport input ssh", True), (r"transport input .*telnet", False)],
+        "expect": [
+            (r"transport input ssh", True),
+            (r"transport input .*telnet", False),
+        ],
         "points": 3,
         "attack": "8. Telnet / gyenge elérés",
     },
-
     # ---------- 9. Double-tagging -> NATÍV VLAN HARDENING ------------------
     {
         "id": "s1-native-vlan-not-default",
@@ -233,14 +249,15 @@ CHECKS = [
         "points": 4,
         "attack": "9. 802.1Q double-tagging",
     },
-
     # ---------- 10. IP spoofing -> IP SOURCE GUARD --------------------------
     {
         "id": "s1-ipsg-enabled",
         "device": "S1",
         "cmd": "show ip verify source",
-        "expect": [(r"Interface\s+Filter-type\s+Filter-mode", True),
-                   (r"Fa0/(1|3)\s+ip\s+active", True)],
+        "expect": [
+            (r"Interface\s+Filter-type\s+Filter-mode", True),
+            (r"Fa0/(1|3)\s+ip\s+active", True),
+        ],
         "points": 8,
         "attack": "10. IP spoofing",
     },
@@ -252,7 +269,6 @@ CHECKS = [
         "points": 4,
         "attack": "10. IP spoofing",
     },
-
     # ---------- 11. LLDP felderítés -----------------------------------------
     {
         "id": "s1-lldp-access-off",
@@ -264,7 +280,6 @@ CHECKS = [
         "points": 6,
         "attack": "11. LLDP felderítés",
     },
-
     # ---------- 12. ICMP redirect MITM --------------------------------------
     {
         "id": "r1-no-redirects",
@@ -287,12 +302,6 @@ CHECKS = [
 # ============================================================================
 # MOTOR
 # ============================================================================
-
-def connect(params):
-    try:
-        return ConnectHandler(**params), None
-    except (NetmikoTimeoutException, NetmikoAuthenticationException) as e:
-        return None, str(e)
 
 
 def run_check(conn, check):
@@ -338,8 +347,10 @@ def main():
     devices = inventory["devices"]
     print("=" * 78)
     print(" SRWE 10-11 LABOR — AUTOMATIZÁLT VÉDELEM-ELLENŐRZÉS")
-    print(f" Időpont: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
-          f" | Ellenőrzések száma: {len(CHECKS)}")
+    print(
+        f" Időpont: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        f" | Ellenőrzések száma: {len(CHECKS)}"
+    )
     print("=" * 78)
 
     conns = {}
@@ -379,8 +390,10 @@ def main():
     fail_cnt = len([r for r in results if r["passed"] is False])
     skip_cnt = len([r for r in results if r["passed"] is None])
     print("-" * 78)
-    print(f" Átment ellenőrzések: {ok_cnt} / {total}"
-          f"   (Hiba: {fail_cnt}, Kihagyva: {skip_cnt})")
+    print(
+        f" Átment ellenőrzések: {ok_cnt} / {total}"
+        f"   (Hiba: {fail_cnt}, Kihagyva: {skip_cnt})"
+    )
     if fail_cnt == 0 and total > 0:
         print(" Eredmény: MINDEN ellenőrzött védelem a helyén van.")
     elif fail_cnt > 0:
@@ -400,15 +413,31 @@ def main():
 
     if args.json:
         with open(args.json, "w") as f:
-            json.dump({
-                "timestamp": datetime.now().isoformat(),
-                "summary": {"checks_total": total, "passed": ok_cnt,
-                            "failed": fail_cnt, "skipped": skip_cnt},
-                "results": [{"id": r["id"], "device": r["device"], "cmd": r["cmd"],
-                             "attack": r["attack"],
-                             "passed": r["passed"], "details": r["details"]}
-                            for r in results],
-            }, f, indent=2, ensure_ascii=False)
+            json.dump(
+                {
+                    "timestamp": datetime.now().isoformat(),
+                    "summary": {
+                        "checks_total": total,
+                        "passed": ok_cnt,
+                        "failed": fail_cnt,
+                        "skipped": skip_cnt,
+                    },
+                    "results": [
+                        {
+                            "id": r["id"],
+                            "device": r["device"],
+                            "cmd": r["cmd"],
+                            "attack": r["attack"],
+                            "passed": r["passed"],
+                            "details": r["details"],
+                        }
+                        for r in results
+                    ],
+                },
+                f,
+                indent=2,
+                ensure_ascii=False,
+            )
         print(f"\n[+] JSON mentve: {args.json}")
 
     sys.exit(0 if fail_cnt == 0 else 1)

@@ -13,6 +13,7 @@ import sys
 import yaml
 from netmiko import ConnectHandler
 from netmiko.exceptions import NetmikoAuthenticationException, NetmikoTimeoutException
+from paramiko.ssh_exception import SSHException
 
 
 # Egy eszköz-konfigban ezek a (opcionális) kulcsok fordulhatnak elő.

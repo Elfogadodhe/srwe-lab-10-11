@@ -16,3 +16,5 @@ verify_*.json
 *.swp
 .idea/
 .vscode/
+
+/net-commander
