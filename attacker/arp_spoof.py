@@ -2,7 +2,7 @@
 """Kétirányú ARP poisoning: az áldozat és a gateway felé is azt hazudjuk,
 hogy a másik MAC-címe a miénk. Így a kétirányú forgalom rajtunk át megy (MITM).
 
-Futtatás: sudo python arp_spoof.py eth0 10.10.10.20 10.10.10.1
+Futtatás: sudo python arp_spoof.py eth0 172.16.10.20 172.16.10.1
 """
 import sys, time
 from scapy.all import ARP, send, get_if_hwaddr, arping, conf

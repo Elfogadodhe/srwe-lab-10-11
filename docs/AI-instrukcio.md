@@ -1,6 +1,6 @@
 # AI-Instrukció: SRWE M10–11 Laborfeladat Automatizált Előállítása
 
-*Dokumentum-verzió: v3.0 | Utolsó frissítés: 2026-11-19*
+*Dokumentum-verzió: v3.1 | Utolsó frissítés: 2026-11-19*
 
 ## RÉSZ 0 — KIEGÉSZÍTŐ TÁMADÁSI JAVASLATOK (bővítési roadmap)
 
@@ -46,7 +46,7 @@ A támadó 255-ös prioritású HSRP Hello-kat küld a virtuális IP-re, átvesz
 ```python
 #!/usr/bin/env python3
 """HSRP takeover: maximális (255) prioritású Hello-val átveszi az Active gateway-t.
-Futtatás: sudo python hsrp_hijack.py eth0 10.10.10.1 10.10.10.254
+Futtatás: sudo python hsrp_hijack.py eth0 172.16.10.1 172.16.10.254
     argv1=iface, argv2=virtuális IP (VIP), argv3=támadó valós IP
 """
 import sys
@@ -241,13 +241,15 @@ srwe-lab/
 
 ---
 
-*Dokumentum-verzió: v3.0 | Utolsó frissítés: 2026-11-19*
+*Dokumentum-verzió: v3.1 | Utolsó frissítés: 2026-11-19*
 
 ---
 
 ## VÁLTOZÁSNAPLÓ
 
 > Munkamenetre vonatkozó változásnapló. Minden módosítás timestamp-pel (ÉÉÉÉ-HH-NN).
+
+- **2026-11-19 (v3.1):** **Címzési terv átdolgozva — vegyes címzés.** A VLAN 99 (menedzsment) /8-as címzése marad a könnyű konfigurációért (`10.0.99.0/8`, PC-A címe változatlan); a VLAN 10 és VLAN 20 user alhálózatai a `172.16.0.0/12` tartomány /24-es alhálózataira térnek át. Új címzés: VLAN 10 = `172.16.10.0/24` (GW `172.16.10.1`, PC-V DHCP `.11`–`.254`, ATTACKER statikus `.66`), VLAN 20 = `172.16.20.0/24` (GW `172.16.20.1`, PC-W `.10`). Frissítve: `configs/baseline.yml` (Gi0/1.10/.20 IP + DHCP-pool), `inventory.yml` (`user_subnet`, `legit_gateway`, `legit_dhcp`), mind a 7 érintett `attacker/` szkript alapértéke és példaparancsa (arp_spoof, icmp_redirect, ip_spoof, mac_flood, mac_spoof, rogue_dhcp, vlan_double_tag), a könyv §12 Mermaid-ábrája + IP-táblázatai + DHCP-megjegyzése + beágyazott szkript-másolatai, a hallgatói feladatlap támadási parancsai és a deploy-checklist. A SSH-fix és a verify.py (IP-semleges regexek) nem változott. Instrukció v3.1-re frissítve.
 
 - **2026-11-19:** **SSH kex-kompatibilitás rögzítve + teljes /8 címzés.** (1) **SSH-fix a repóba:** az R1 régi IOS-a csak SHA-1 kex-et ajánl (`diffie-hellman-group-exchange-sha1/group14-sha1/group1-sha1`), amit a paramiko ≥5.x már nem fogad el — `requirements.txt`-ben rögzítve a `paramiko>=3.5,<5` verzió; a README-be új „SSH kompatibilitás (R1, régi IOS)" szakasz (paramiko-pin magyarázat + `~/.ssh/config` blokk a rendszer-ssh-hoz: `KexAlgorithms/HostKeyAlgorithms/PubkeyAcceptedAlgorithms +…sha1/+ssh-rsa`); a deploy-checklist hibakereső táblázatába új sor az `Incompatible ssh peer (no acceptable kex algorithm)` hibához. (2) **Teljes hálózat /24 → /8:** minden alhálózat /8-as maszkkal fut (`10.0.99.0/8`, `10.10.10.0/8`, `10.20.20.0/8`) — frissítve: `configs/baseline.yml` (SVI-k, R1 subinterface-ek, DHCP-pool `network … 255.0.0.0`), `inventory.yml` (`user_subnet: 10.10.10.0/8`), `attacker/rogue_dhcp.py` (OFFER `subnet_mask` 255.0.0.0), a könyv §12 Mermaid-ábrája és mindkét IP-címzési táblázata, valamint a deploy-checklist. A verify.py regexei IP-semlegesek (kimenet-struktúrát illesztenek), így nem szorulnak módosításra. Instrukció v3.0-ra frissítve.
 

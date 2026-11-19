@@ -156,7 +156,7 @@ _________________________________________________________________________
 
 **Megfigyelés (PC-V):** `ip route` és `cat /etc/resolv.conf`
 
-**Kérdés:** Ki a kiosztott gateway és DNS? Egyezik-e a legitim 10.10.10.1-gyel? _____
+**Kérdés:** Ki a kiosztott gateway és DNS? Egyezik-e a legitim 172.16.10.1-gyel? _____
 
 **Mit jelent ez a pozícióból adódóan (hova kerül a PC-V forgalma)?**
 
@@ -182,9 +182,9 @@ _________________________________________________________________________
 
 ## Fázis 5 – ARP poisoning (kétirányú MITM)
 
-**Támadás:** `sudo python attacker/arp_spoof.py eth0 10.10.10.20 10.10.10.1`
+**Támadás:** `sudo python attacker/arp_spoof.py eth0 172.16.10.20 172.16.10.1`
 
-**Megfigyelés (PC-V):** `arp -a | grep 10.10.10.1`
+**Megfigyelés (PC-V):** `arp -a | grep 172.16.10.1`
 
 **Kérdés:** Milyen MAC-cím tartozik a gateway-hez? Egyezik-e a támadó MAC-jével? _____
 
@@ -304,7 +304,7 @@ _________________________________________________________________________
 
 ## Fázis 9 – 802.1Q double-tagging
 
-**Támadás:** `sudo python attacker/vlan_double_tag.py eth0 10.20.20.10`
+**Támadás:** `sudo python attacker/vlan_double_tag.py eth0 172.16.20.10`
 
 **Megfigyelés (PC-W, VLAN 20):** `tcpdump -i eth0 icmp`
 
@@ -340,9 +340,9 @@ _________________________________________________________________________
 
 ## Fázis 10 – IP spoofing
 
-**Támadás:** `sudo python attacker/ip_spoof.py eth0 10.10.10.50`
+**Támadás:** `sudo python attacker/ip_spoof.py eth0 172.16.10.50`
 
-**Kérdés:** A hamis 10.10.10.50 szerepel-e a DHCP snooping binding táblában? _____
+**Kérdés:** A hamis 172.16.10.50 szerepel-e a DHCP snooping binding táblában? _____
 
 **Miért nem fogja meg a DHCP snooping önmagában ezt a forgalmat?**
 
@@ -406,7 +406,7 @@ _________________________________________________________________________
 _________________________________________________________________________
 ```
 
-**Támadás:** `sudo python attacker/icmp_redirect.py eth0 10.10.10.20 10.10.10.1`
+**Támadás:** `sudo python attacker/icmp_redirect.py eth0 172.16.10.20 172.16.10.1`
 
 **Megfigyelés (PC-V):** `ip route get 8.8.8.8` — Települt-e a támadón át vezető route? _____
 

