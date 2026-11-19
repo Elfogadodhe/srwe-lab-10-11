@@ -21,6 +21,6 @@ devices:
 management_vlan: 99
 user_vlan: 10
 test_vlan: 20
-user_subnet: 10.10.10.0/24
+user_subnet: 10.10.10.0/8
 legit_gateway: 10.10.10.1
 legit_dhcp: 10.10.10.1

@@ -120,6 +120,7 @@ ssh admin@10.0.99.1
 | Hiba | Ok | Megoldás |
 |---|---|---|
 | **`push_config.py` nem csatlakozik SSH-n** | Baseline-ban nincs SSH kulcs generálva | Futtasd: `crypto key generate rsa modulus 1024` manuálisan |
+| **`Incompatible ssh peer (no acceptable kex algorithm)`** | Az R1 IOS-a csak SHA-1 kex-et ajánl; a paramiko ≥5.x már nem támogatja | Maradj a `requirements.txt`-ben rögzített `paramiko>=3.5,<5` verziónál. Rendszer-ssh-hoz add hozzá a `~/.ssh/config`-hoz a README „SSH kompatibilitás" szakaszában lévő blokkot |
 | **Telnet próba nem működik** | Baseline VTY még SSH-only | **Javítsd** a baseline-t a `transport input telnet ssh` sorral |
 | **IP Source Guard minden forgalmat blokkol** | DHCP snooping még nincs bekapcsolva | Pusheld előbb a `dhcp-snooping` szekciót |
 | **DAI statistics 0 dropped** | ARP forgalom nincs szimulálva | Futass `arp_spoof.py`-t újra a támadó gépen |
@@ -147,8 +148,8 @@ ssh admin@10.0.99.1
 
 - [ ] Fizikai eszközök összeállítása (2× switch, 1× router, 3× PC)
 - [ ] Topológia bekötve (S1–S2 trunk, PC-V, PC-A, ATTACKER)
-- [ ] R1-en DHCP pool konfigurálva (VLAN 10, 10.10.10.0/24)
-- [ ] PC-A (admin) IP-cím: 10.0.99.10/24, SSH elérhető
+- [ ] R1-en DHCP pool konfigurálva (VLAN 10, 10.10.10.0/8)
+- [ ] PC-A (admin) IP-cím: 10.0.99.10/8, SSH elérhető
 - [ ] ATTACKER (Kali/Debian) root jog, scapy telepítve
 - [ ] **baseline.yml** feltöltve (Telnet nyitva — sebezhető kiinduló állapot)
 - [ ] `verify.py` futási teszt (legalább S1-en)

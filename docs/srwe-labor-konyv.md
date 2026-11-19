@@ -69,7 +69,7 @@ A labor végén egy ellenőrző szkript (`verify.py`) **ellenőrzi**, hogy minde
 ## 2. A 12 támadás és a hozzájuk tartozó védelem
 
 | \# | Támadás | Mit csinál (nagyon röviden) | Védelem |
-|----------------|----------------|-------------------------|----------------|
+|-----------------|-----------------|-----------------------|-----------------|
 | 1 | MAC flood (CAM overflow) | Teleszemeteli a switch MAC-tábláját → a switch mindenkinek mindent továbbít | Port Security |
 | 2 | MAC spoofing | Ellopja egy legit gép MAC-címét | Port Security (sticky) |
 | 3 | DHCP starvation | Elfogyasztja az összes kiosztható IP-címet (DoS) | DHCP Snooping (+ rate limit) |
@@ -88,7 +88,7 @@ A labor végén egy ellenőrző szkript (`verify.py`) **ellenőrzi**, hogy minde
 A labor néhány fájlból áll. Ezek **már a repóban vannak** (nem kell létrehoznod őket) — a III. rész bemutatja, melyik mire való, és a teljes tartalmukat is tartalmazza referenciaként.
 
 | Fájl | Mire való |
-|------------------|------------------------------------------------------|
+|-------------------|-----------------------------------------------------|
 | `inventory.yml` | A három hálózati eszköz (S1, S2 switch, R1 router) IP-címe és bejelentkezési adatai. Minden feltöltő/ellenőrző parancs ebből dolgozik. |
 | `configs/baseline.yml` | A **sebezhető kiinduló állapot**: minden védelem KI van kapcsolva, de az eszközök elérhetők (és a Telnet szándékosan nyitva, hogy a 8. fázis bemutatható legyen). |
 | `configs/mitigations.yml` | A **12 védelem** leírása, szekciókra bontva. Szekciónként feltölthető. |
@@ -101,7 +101,7 @@ A labor néhány fájlból áll. Ezek **már a repóban vannak** (nem kell létr
 A laborban három "szereplő" van. Ezek lehetnek külön fizikai gépek vagy külön virtuális gépek (VM-ek):
 
 | Szerep | Gép | Mit csinál | Mi kell rá |
-|-----------------|-----------------|---------------------|-----------------|
+|------------------|------------------|--------------------|------------------|
 | **Üzemeltető / admin** | PC-A | Feltölti a konfigot és ellenőriz (`push_config.py`, `verify.py`) | Python + `netmiko`, `pyyaml` |
 | **Támadó** | ATTACKER | Futtatja a támadó szkripteket | Python + `scapy`, **root jog** |
 | **Áldozat / megfigyelő** | PC-V (és PC-W a 9. fázishoz) | A forgalmat figyeli: **Linuxon `tcpdump`**, **Windowson Wireshark** | Linux + `tcpdump`, **vagy** Windows + Wireshark |
@@ -299,15 +299,15 @@ A listában látnod kell a `netmiko`, `PyYAML`, illetve `scapy` sorokat.
 
 ``` mermaid
 graph TD
-    subgraph VLAN99["Menedzsment &middot; VLAN 99 &middot; 10.0.99.0/24"]
+    subgraph VLAN99["Menedzsment &middot; VLAN 99 &middot; 10.0.99.0/8"]
         PCA["PC-A: admin / netmiko<br/>NIC 10.0.99.10"]
     end
-    subgraph VLAN10["User &middot; VLAN 10 &middot; 10.10.10.0/24"]
+    subgraph VLAN10["User &middot; VLAN 10 &middot; 10.10.10.0/8"]
         PCV["PC-V: áldozat<br/>NIC DHCP .11-.254"]
         ATK["ATTACKER: támadó<br/>scapy, root"]
     end
-    subgraph VLAN20["Test &middot; VLAN 20 &middot; 10.20.20.0/24"]
-        PCW["PC-W: double-tag cél<br/>NIC 10.20.20.0/24"]
+    subgraph VLAN20["Test &middot; VLAN 20 &middot; 10.20.20.0/8"]
+        PCW["PC-W: double-tag cél<br/>NIC 10.20.20.0/8"]
     end
     R1["R1: router-on-a-stick + DHCP<br/>Gi0/1.10 10.10.10.1<br/>Gi0/1.20 10.20.20.1<br/>Gi0/1.99 10.0.99.254 mgmt GW"]
     S1["S1 switch<br/>SVI VLAN99 10.0.99.1"]
@@ -327,31 +327,31 @@ graph TD
 | Eszköz | Interfész | VLAN / típus | IP-cím | Szerep |
 |---------------|---------------|---------------|---------------|---------------|
 | **R1** | Gi0/1 | trunk (szülő) | — (nincs IP) | Router-on-a-stick trunk S1 felé |
-| **R1** | Gi0/1.10 | VLAN 10 (dot1Q) | `10.10.10.1/24` | VLAN 10 átjáró + DHCP-kiszolgáló |
-| **R1** | Gi0/1.20 | VLAN 20 (dot1Q) | `10.20.20.1/24` | VLAN 20 átjáró |
-| **R1** | Gi0/1.99 | VLAN 99 (dot1Q) | `10.0.99.254/24` | VLAN 99 átjáró = a switchek default-gateway-e (menedzsment) |
-| **S1** | SVI VLAN 99 | VLAN 99 | `10.0.99.1/24` | S1 menedzsment-IP (SSH / netmiko) |
+| **R1** | Gi0/1.10 | VLAN 10 (dot1Q) | `10.10.10.1/8` | VLAN 10 átjáró + DHCP-kiszolgáló |
+| **R1** | Gi0/1.20 | VLAN 20 (dot1Q) | `10.20.20.1/8` | VLAN 20 átjáró |
+| **R1** | Gi0/1.99 | VLAN 99 (dot1Q) | `10.0.99.254/8` | VLAN 99 átjáró = a switchek default-gateway-e (menedzsment) |
+| **S1** | SVI VLAN 99 | VLAN 99 | `10.0.99.1/8` | S1 menedzsment-IP (SSH / netmiko) |
 | **S1** | Fa0/1 | VLAN 10 (access) | — | PC-V (áldozat) |
 | **S1** | Fa0/2 | VLAN 99 (access) | — | PC-A (admin / netmiko) |
 | **S1** | Fa0/3 | VLAN 10 (access) | — | ATTACKER (támadó) |
 | **S1** | Fa0/24 | trunk | — | Trunk S2 felé (VLAN 10,20,99) |
-| **S2** | SVI VLAN 99 | VLAN 99 | `10.0.99.2/24` | S2 menedzsment-IP (SSH / netmiko) |
+| **S2** | SVI VLAN 99 | VLAN 99 | `10.0.99.2/8` | S2 menedzsment-IP (SSH / netmiko) |
 | **S2** | Fa0/1 | VLAN 20 (access) | — | PC-W (double-tagging cél) |
 | **S2** | Fa0/24 | trunk | — | Trunk S1 felé (VLAN 10,20,99) |
-| **PC-A** | NIC | VLAN 99 | `10.0.99.10/24` (statikus) | Admin gép, netmiko-t futtat |
-| **PC-V** | NIC | VLAN 10 | `10.10.10.0/24` (DHCP, `.11`–`.254`) | Áldozat |
-| **ATTACKER** | NIC | VLAN 10 | `10.10.10.0/24` | Támadó (scapy, root) |
-| **PC-W** | NIC | VLAN 20 | `10.20.20.0/24` | Double-tagging cél (9. fázis) |
+| **PC-A** | NIC | VLAN 99 | `10.0.99.10/8` (statikus) | Admin gép, netmiko-t futtat |
+| **PC-V** | NIC | VLAN 10 | `10.10.10.0/8` (DHCP, `.11`–`.254`) | Áldozat |
+| **ATTACKER** | NIC | VLAN 10 | `10.10.10.0/8` | Támadó (scapy, root) |
+| **PC-W** | NIC | VLAN 20 | `10.20.20.0/8` | Double-tagging cél (9. fázis) |
 
 ### VLAN-összefoglaló
 
 | VLAN   | Szerep                  | Alhálózat       | Átjáró                      |
-|-----------------|-----------------|-----------------|---------------------|
-| **10** | User (áldozat + támadó) | `10.10.10.0/24` | `10.10.10.1` (R1 Gi0/1.10)  |
-| **20** | Test (double-tag cél)   | `10.20.20.0/24` | `10.20.20.1` (R1 Gi0/1.20)  |
-| **99** | Menedzsment             | `10.0.99.0/24`  | `10.0.99.254` (R1 Gi0/1.99) |
+|------------------|------------------|------------------|--------------------|
+| **10** | User (áldozat + támadó) | `10.10.10.0/8` | `10.10.10.1` (R1 Gi0/1.10)  |
+| **20** | Test (double-tag cél)   | `10.20.20.0/8` | `10.20.20.1` (R1 Gi0/1.20)  |
+| **99** | Menedzsment             | `10.0.99.0/8`  | `10.0.99.254` (R1 Gi0/1.99) |
 
-> **DHCP:** a VLAN 10 pool (`USERS`) a `10.10.10.0/24` hálózatot osztja; a `10.10.10.1`–`10.10.10.10` tartomány kizárva (statikus/átjáró), így a PC-V a `.11`-től felfelé kap címet.
+> **DHCP:** a VLAN 10 pool (`USERS`) a `10.10.10.0/8` hálózatot osztja; a `10.10.10.1`–`10.10.10.10` tartomány kizárva (statikus/átjáró), így a PC-V a `.11`-től felfelé kap címet.
 
 **Gépkövetelmények (emlékeztető):**
 
@@ -420,7 +420,7 @@ devices:
 management_vlan: 99
 user_vlan: 10
 test_vlan: 20
-user_subnet: 10.10.10.0/24
+user_subnet: 10.10.10.0/8
 legit_gateway: 10.10.10.1
 legit_dhcp: 10.10.10.1
 ```
@@ -1894,7 +1894,7 @@ sudo sysctl -w net.ipv4.conf.eth0.accept_redirects=0
 ## 27. Hibakeresési gyorslista
 
 | Tünet | Valószínű ok / teendő |
-|------------------------|------------------------------------------------|
+|------------------------|-----------------------------------------------|
 | netmiko timeout / auth hiba | Rossz IP vagy jelszó az `inventory.yml`-ben; az eszköz nem elérhető a VLAN 99-en; az SSH nincs felhozva (`crypto key generate rsa`) |
 | Push után „parancs nem ismert" | A YAML-blokkból hiányzik az explicit `exit` (a `push_config.py` nem szúr be automatikusat) |
 | A támadás „nem csinál semmit" | Az ATTACKER nem root (hiányzik a `sudo`); rossz interfésznév (nem `eth0`); a virtuális switch portja nem promiscuous/trunk-áteresztő |

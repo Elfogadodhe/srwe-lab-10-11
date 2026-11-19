@@ -10,3 +10,9 @@
 netmiko>=4.0
 pyyaml>=6.0
 scapy>=2.5
+
+# SSH-fix: R1 (régi IOS) csak SHA-1 kex algoritmusokat ajánl
+# (diffie-hellman-group14-sha1 stb.). A paramiko >= 5.0 törölte ezek
+# támogatását, ezért 4.x re telepítünk, mely még tartalmazza őket.
+# Lásd README.md "SSH kompatibilitás" szakasz.
+paramiko>=3.5,<5

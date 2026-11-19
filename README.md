@@ -38,6 +38,20 @@ A labor **12 Layer 2 támadást** és a hozzájuk tartozó Cisco-védelmet járj
 
 A következő iterációk bővítési roadmapját (13–16. fázis: HSRP eltérítés, IPv6 RA spoofing, DHCPv6 starvation/spoofing, VTP injection) lásd: `docs/AI-instrukcio.md`, RÉSZ 0.
 
+## SSH kompatibilitás (R1, régi IOS)
+
+Az R1 IOS-a csak SHA-1 alapú kulcscsere-algoritmusokat ajánl (`diffie-hellman-group-exchange-sha1`, `diffie-hellman-group14-sha1`, `diffie-hellman-group1-sha1`). Két féle kliens ütközik vele:
+
+1. **Python (paramiko):** a paramiko 5.x törölte a SHA-1 kex támogatást — ezért a `requirements.txt` a `paramiko>=3.5,<5` verziót rögzíti. Ne frissítsd 5.x-re, különben az `Incompatible ssh peer (no acceptable kex algorithm)` hiba visszatér.
+2. **Rendszer-ssh (macOS/Linux):** a beépített OpenSSH alapból visszautasítja a SHA-1 kex-et. Adj hozzá a `~/.ssh/config`-hoz:
+
+```
+Host 10.0.99.254
+  KexAlgorithms +diffie-hellman-group14-sha1,diffie-hellman-group1-sha1,diffie-hellman-group-exchange-sha1
+  HostKeyAlgorithms +ssh-rsa
+  PubkeyAcceptedAlgorithms +ssh-rsa
+```
+
 ## Biztonsági megkötés
 
 A labor **kizárólag izolált, oktatási célú hálózati szegmensen** futtatható. A támadó szkriptek valódi Layer 2/3 támadásokat szimulálnak — éles vagy intézményi hálózaton tilos futtatni őket.

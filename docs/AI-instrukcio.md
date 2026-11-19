@@ -1,6 +1,6 @@
 # AI-Instrukció: SRWE M10–11 Laborfeladat Automatizált Előállítása
 
-*Dokumentum-verzió: v2.9 | Utolsó frissítés: 2026-11-17*
+*Dokumentum-verzió: v3.0 | Utolsó frissítés: 2026-11-19*
 
 ## RÉSZ 0 — KIEGÉSZÍTŐ TÁMADÁSI JAVASLATOK (bővítési roadmap)
 
@@ -241,13 +241,15 @@ srwe-lab/
 
 ---
 
-*Dokumentum-verzió: v2.9 | Utolsó frissítés: 2026-11-17*
+*Dokumentum-verzió: v3.0 | Utolsó frissítés: 2026-11-19*
 
 ---
 
 ## VÁLTOZÁSNAPLÓ
 
 > Munkamenetre vonatkozó változásnapló. Minden módosítás timestamp-pel (ÉÉÉÉ-HH-NN).
+
+- **2026-11-19:** **SSH kex-kompatibilitás rögzítve + teljes /8 címzés.** (1) **SSH-fix a repóba:** az R1 régi IOS-a csak SHA-1 kex-et ajánl (`diffie-hellman-group-exchange-sha1/group14-sha1/group1-sha1`), amit a paramiko ≥5.x már nem fogad el — `requirements.txt`-ben rögzítve a `paramiko>=3.5,<5` verzió; a README-be új „SSH kompatibilitás (R1, régi IOS)" szakasz (paramiko-pin magyarázat + `~/.ssh/config` blokk a rendszer-ssh-hoz: `KexAlgorithms/HostKeyAlgorithms/PubkeyAcceptedAlgorithms +…sha1/+ssh-rsa`); a deploy-checklist hibakereső táblázatába új sor az `Incompatible ssh peer (no acceptable kex algorithm)` hibához. (2) **Teljes hálózat /24 → /8:** minden alhálózat /8-as maszkkal fut (`10.0.99.0/8`, `10.10.10.0/8`, `10.20.20.0/8`) — frissítve: `configs/baseline.yml` (SVI-k, R1 subinterface-ek, DHCP-pool `network … 255.0.0.0`), `inventory.yml` (`user_subnet: 10.10.10.0/8`), `attacker/rogue_dhcp.py` (OFFER `subnet_mask` 255.0.0.0), a könyv §12 Mermaid-ábrája és mindkét IP-címzési táblázata, valamint a deploy-checklist. A verify.py regexei IP-semlegesek (kimenet-struktúrát illesztenek), így nem szorulnak módosításra. Instrukció v3.0-ra frissítve.
 
 - **2026-11-17:** **`push_config.py` hiba javítva + egységes `python` parancs.** (1) A `push_config.py` eddig csak a **szekciós** `mitigations.yml`-t (szekció → eszköz → konfig) kezelte; a **lapos** `baseline.yml`-re (eszköz → konfig, top-level S1/S2/R1) `KeyError: 'global'`-lal elszállt (traceback a 95→85→26 sorokon). Hozzáadva a `CONFIG_KEYS` + `is_device_cfg()` automatikus szerkezet-felismerés és egy inventory-eszköznév őrszem; a `main()` mindkét szerkezetet egységes (szekció, eszköz, konfig) listává normalizálja, a szűrő lapos fájlnál eszköznévre, szekciósnál szekciónévre hat. Egységteszttel ellenőrizve (baseline → S1/S2/R1; mitigations → 19 szekció×eszköz, mind valid; szűrés OK). A könyv §17 beágyazott másolata szinkronizálva a javított fájllal. (2) **Egységes `python` parancs minden rendszeren:** ellenőrizve, hogy a `python` Linuxon is működik; a könyv és az összes doksi (`hallgatoi-feladatlap.md`, `index-es-deploy-checklist.md`, `AI-instrukcio.md`, `verify.py`, `attacker/*.py`, `push_config.py`) parancs-invokációi `python3 …` → `python …`-ra váltva (a shebangok `#!/usr/bin/env python3` és az apt **csomagnevek** érintetlenek). A Linux-telepítőbe bekerült a `python-is-python3` csomag (ez adja a `python` parancsot Ubuntu/Debianon), és a §7 parancsnév-megjegyzés egységesítve; megmaradt a Windows- (MS Store → `py`) és Linux- (`python3 -m venv` egyszeri) tartalék-tipp. Instrukció v2.9-re frissítve.
 - **2026-11-17:** **IP-átfedés javítva.** R1-nek korábban két interfésze is a `10.0.99.0/24` (VLAN 99) alhálózatban volt — `Gi0/0` = `.254` és `Gi0/1.99` = `.253` —, amit a valódi Cisco IOS „% overlaps with GigabitEthernet0/0" hibával elutasít. A felesleges `Gi0/0` interfész eltávolítva (`baseline.yml` R1-blokkja és a könyv §15 reprodukciója); a VLAN 99 átjáró ezentúl egyedül a `Gi0/1.99`-en van, **`.254`** címen (ez egyezik a switchek `default-gateway`-ével és az `inventory.yml` R1-host címével) — tiszta router-on-a-stick, egyetlen `Gi0/1` trunkkel. Frissítve a §12 Mermaid-ábra (törölve a `Gi0/0` él és csomópont-sor), az interfész- és VLAN-táblázat, valamint a jelmagyarázat. YAML újravalidálva, Mermaid újrarenderelve. Instrukció v2.8-ra frissítve.
