@@ -8,10 +8,10 @@ S1:
     - vlan 99
     - exit
     - interface vlan 99
-    - ip address 10.0.99.1 255.0.0.0
+    - ip address 10.0.0.2 255.0.0.0
     - no shutdown
     - exit
-    - ip default-gateway 10.0.99.254
+    - ip default-gateway 10.0.0.1
     - ip domain-name lab.local
     - crypto key generate rsa modulus 1024
     - username admin privilege 15 secret cisco123
@@ -50,10 +50,10 @@ S2:
     - vlan 99
     - exit
     - interface vlan 99
-    - ip address 10.0.99.2 255.0.0.0
+    - ip address 10.0.0.3 255.0.0.0
     - no shutdown
     - exit
-    - ip default-gateway 10.0.99.254
+    - ip default-gateway 10.0.0.1
     - ip domain-name lab.local
     - crypto key generate rsa modulus 1024
     - username admin privilege 15 secret cisco123
@@ -89,7 +89,7 @@ R1:
     - exit
     - interface GigabitEthernet0/1.99
     - encapsulation dot1Q 99
-    - ip address 10.0.99.254 255.0.0.0
+    - ip address 10.0.0.1 255.0.0.0
     - exit
     # NINCS 'no ip redirects' — az ICMP-redirect támadás (12. fázis) miatt
   dhcp_pool:
