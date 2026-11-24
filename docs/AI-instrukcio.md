@@ -1,6 +1,6 @@
 # AI-Instrukció: SRWE M10–11 Laborfeladat Automatizált Előállítása
 
-*Dokumentum-verzió: v3.3 | Utolsó frissítés: 2026-11-24*
+*Dokumentum-verzió: v3.4 | Utolsó frissítés: 2026-11-24*
 
 ## RÉSZ 0 — KIEGÉSZÍTŐ TÁMADÁSI JAVASLATOK (bővítési roadmap)
 
@@ -241,13 +241,15 @@ srwe-lab/
 
 ---
 
-*Dokumentum-verzió: v3.3 | Utolsó frissítés: 2026-11-24*
+*Dokumentum-verzió: v3.4 | Utolsó frissítés: 2026-11-24*
 
 ---
 
 ## VÁLTOZÁSNAPLÓ
 
 > Munkamenetre vonatkozó változásnapló. Minden módosítás timestamp-pel (ÉÉÉÉ-HH-NN).
+
+> - **2026-11-24 (v3.4):** **vty vonalak: `login` → `login local` (S1, S2 baseline).** Ok: `login` (line-jelszó) mellett az SSH a line-password-öt ellenőrzi, nem a `username`-adatbázist — így a netmiko `admin`/`cisco123` belépése nem érvényesülne. `login local`-al a vty-n a `username admin privilege 15 secret cisco123` adatbázis szolgálja ki az SSH-t ÉS a telnetet is. A `password ciscotelnet` sor a vty-ban megmarad, de `login local` mellett inaktív (funkciója: a 8. fázis `service password-encryption` demójában a `show run` mutatja az encryptált line-password-öt). Frissítve: `configs/baseline.yml` (S1+S2 vty szekció), konyv beágyazott baseline-másolatok, deploy-checklist VTY-elvárás blokk. A konyv 20.1 kézi konzol-blokkjai már `login local`-t tartalmaztak; a mitigations `hardening` szekció szintén `login local`-t használ — konzisztens a teljes lánc. A 8. fázis telnet-demója változatlanul játszható: a telnet most username-t is kér (a gyengeség maga a plaintext protokoll, nem a jelszó-mechanizmus).
 
 > - **2026-11-24 (v3.3):** **`enable secret cisco123` hozzáadva a baseline-hoz (S1, S2).** Ok: a vty line-okon `password ciscotelnet` + `login` van, így telnetes belépéskor a laborzó user EXEC (`>`) szintjén ragad, és az `enable` parancs nincs hova vigye — a további fázisok pushja elakad. Fix: `enable secret cisco123` bekerült S1 és S2 global szekciójába (a `username` sor elé), a konyv 20.1 kézi konzol-blokkjaiba, a beágyazott baseline-másolatokba és a deploy-checklist 1.2 VTY-ELVÁRÁS blokjába. Így telnet ÉS ssh egyaránt használható a labor bármely pontján, bármely fázis push-olható. Az R1 (törölt eszköz) szekciója változatlan. Megjegyzés: a secret az inventory.yml `secret: cisco123` mezejével egyezik — a netmiko `enable()` is működik.
 

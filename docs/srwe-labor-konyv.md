@@ -453,7 +453,7 @@ S1:
     - line vty 0 4
     - transport input telnet ssh
     - password ciscotelnet
-    - login
+    - login local
     - exec-timeout 5 0
     - exit
     - ip http server
@@ -496,7 +496,7 @@ S2:
     - line vty 0 4
     - transport input telnet ssh
     - password ciscotelnet
-    - login
+    - login local
     - exec-timeout 5 0
     - exit
   interfaces:

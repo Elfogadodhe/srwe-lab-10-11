@@ -44,7 +44,7 @@ Már a repóban vannak, a helyükön:
 - line vty 0 4
 - transport input telnet ssh
 - password ciscotelnet
-- login
+- login local
 ```
 
 ### 1.3 Függőségek telepítése
