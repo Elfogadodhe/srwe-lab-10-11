@@ -1,6 +1,6 @@
 # AI-Instrukció: SRWE M10–11 Laborfeladat Automatizált Előállítása
 
-*Dokumentum-verzió: v3.2 | Utolsó frissítés: 2026-11-24*
+*Dokumentum-verzió: v3.3 | Utolsó frissítés: 2026-11-24*
 
 ## RÉSZ 0 — KIEGÉSZÍTŐ TÁMADÁSI JAVASLATOK (bővítési roadmap)
 
@@ -241,13 +241,15 @@ srwe-lab/
 
 ---
 
-*Dokumentum-verzió: v3.2 | Utolsó frissítés: 2026-11-24*
+*Dokumentum-verzió: v3.3 | Utolsó frissítés: 2026-11-24*
 
 ---
 
 ## VÁLTOZÁSNAPLÓ
 
 > Munkamenetre vonatkozó változásnapló. Minden módosítás timestamp-pel (ÉÉÉÉ-HH-NN).
+
+> - **2026-11-24 (v3.3):** **`enable secret cisco123` hozzáadva a baseline-hoz (S1, S2).** Ok: a vty line-okon `password ciscotelnet` + `login` van, így telnetes belépéskor a laborzó user EXEC (`>`) szintjén ragad, és az `enable` parancs nincs hova vigye — a további fázisok pushja elakad. Fix: `enable secret cisco123` bekerült S1 és S2 global szekciójába (a `username` sor elé), a konyv 20.1 kézi konzol-blokkjaiba, a beágyazott baseline-másolatokba és a deploy-checklist 1.2 VTY-ELVÁRÁS blokjába. Így telnet ÉS ssh egyaránt használható a labor bármely pontján, bármely fázis push-olható. Az R1 (törölt eszköz) szekciója változatlan. Megjegyzés: a secret az inventory.yml `secret: cisco123` mezejével egyezik — a netmiko `enable()` is működik.
 
 - **2026-11-24 (v3.2):** **9. fázis dokumentációs kiegészítés.** A `docs/srwe-labor-konyv.md` 9. fázis szakaszába szerkesztői megjegyzés került: a NATIVE_BLACKHOLE (VLAN 999) védelem mellett leírásra került a `vlan dot1q tag native` alternatíva, a két technika előnyeinek/hátrányainak és platform-támogatottságának (valós IOS vs. Packet Tracer) összehasonlításával. A konfiguráció nem változott: a native-vlan-hardening szekció továbbra is a 999-es BLACKHOLE-módszert pusholja, a menedzsment VLAN 99 marad (10.0.99.0/8). Az `0ebbf91` (10.0.0.0/8 mgmt) módosítás revertálva (ee972ad), a végső címzés a v3.1-es terv szerint érvényes. Instrukció v3.2-re frissítve.
 
