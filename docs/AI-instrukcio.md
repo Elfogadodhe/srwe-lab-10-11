@@ -1,6 +1,6 @@
 # AI-Instrukció: SRWE M10–11 Laborfeladat Automatizált Előállítása
 
-*Dokumentum-verzió: v3.1 | Utolsó frissítés: 2026-11-19*
+*Dokumentum-verzió: v3.2 | Utolsó frissítés: 2026-11-24*
 
 ## RÉSZ 0 — KIEGÉSZÍTŐ TÁMADÁSI JAVASLATOK (bővítési roadmap)
 
@@ -241,13 +241,15 @@ srwe-lab/
 
 ---
 
-*Dokumentum-verzió: v3.1 | Utolsó frissítés: 2026-11-19*
+*Dokumentum-verzió: v3.2 | Utolsó frissítés: 2026-11-24*
 
 ---
 
 ## VÁLTOZÁSNAPLÓ
 
 > Munkamenetre vonatkozó változásnapló. Minden módosítás timestamp-pel (ÉÉÉÉ-HH-NN).
+
+- **2026-11-24 (v3.2):** **9. fázis dokumentációs kiegészítés.** A `docs/srwe-labor-konyv.md` 9. fázis szakaszába szerkesztői megjegyzés került: a NATIVE_BLACKHOLE (VLAN 999) védelem mellett leírásra került a `vlan dot1q tag native` alternatíva, a két technika előnyeinek/hátrányainak és platform-támogatottságának (valós IOS vs. Packet Tracer) összehasonlításával. A konfiguráció nem változott: a native-vlan-hardening szekció továbbra is a 999-es BLACKHOLE-módszert pusholja, a menedzsment VLAN 99 marad (10.0.99.0/8). Az `0ebbf91` (10.0.0.0/8 mgmt) módosítás revertálva (ee972ad), a végső címzés a v3.1-es terv szerint érvényes. Instrukció v3.2-re frissítve.
 
 - **2026-11-19 (v3.1):** **Címzési terv átdolgozva — vegyes címzés.** A VLAN 99 (menedzsment) /8-as címzése marad a könnyű konfigurációért (`10.0.99.0/8`, PC-A címe változatlan); a VLAN 10 és VLAN 20 user alhálózatai a `172.16.0.0/12` tartomány /24-es alhálózataira térnek át. Új címzés: VLAN 10 = `172.16.10.0/24` (GW `172.16.10.1`, PC-V DHCP `.11`–`.254`, ATTACKER statikus `.66`), VLAN 20 = `172.16.20.0/24` (GW `172.16.20.1`, PC-W `.10`). Frissítve: `configs/baseline.yml` (Gi0/1.10/.20 IP + DHCP-pool), `inventory.yml` (`user_subnet`, `legit_gateway`, `legit_dhcp`), mind a 7 érintett `attacker/` szkript alapértéke és példaparancsa (arp_spoof, icmp_redirect, ip_spoof, mac_flood, mac_spoof, rogue_dhcp, vlan_double_tag), a könyv §12 Mermaid-ábrája + IP-táblázatai + DHCP-megjegyzése + beágyazott szkript-másolatai, a hallgatói feladatlap támadási parancsai és a deploy-checklist. A SSH-fix és a verify.py (IP-semleges regexek) nem változott. Instrukció v3.1-re frissítve.
 

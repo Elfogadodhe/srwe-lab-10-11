@@ -1749,6 +1749,13 @@ python push_config.py inventory.yml configs/mitigations.yml native-vlan-hardenin
 
 **(4) Újratámadás:** futtasd **újra** a double-tagging támadást — most a keret **nem** jut el a VLAN 20-ba.
 
+> **Megjegyzés — alternatív védelem: `vlan dot1q tag native`.** A fenti BLACKHOLE-módszer mellett létezik egy másik bevált technika is: a globális `vlan dot1q tag native` parancs, amely a natív VLAN-t is **címkézve** küldi a trunkon. Ilyenkor a támadó külső (natív) címkéjét a switch nem fogadja el natívnak, mert minden — a natív VLAN-ba tartozó — keret is címkét visel, így a double-tagging meghiúsul. A két védelem közti különbség:
+>
+> - **NATIVE_BLACKHOLE (jelen labor):** a natív VLAN egy üres, dedikált VLAN-ra (999) billen, amelyben nincs host és nincs SVI sem. Előnye: a címkézetlen keretek garantáltan egy „semmi” VLAN-ba hullanak, és **Packet Tracerben is működik**. Hátránya: megváltozik a natív VLAN azonosítója, így ha például a menedzsment ültetnéd a natívba, az ütközne ezzel a beállítással.
+> - **`vlan dot1q tag native`:** a natív VLAN marad, de **címkével** utazik. Előnye: a natív VLAN tartalma (akár menedzsment) érintetlen marad, ez az IEEE 802.1Q-nak megfelelő szigorú megoldás. Hátránya: csak **valós IOS-on** támogatott (Cisco 2960 is tudja), **Packet Tracerben nem él**; emellett a trunk mindkét végén konzisztensen kell érvényesülnie, és a régebbi/embedded eszközök nem tolerálják a címkézett natív kereteket.
+>
+> Ebben a laborban azért maradt a BLACKHOLE-megoldás, mert az azonos Labor-környezetben szimulálható és a leglátványosabb, de valós hálózatban — ha a natív VLAN-ban kell hagyni a menedzsmentet — a `vlan dot1q tag native` az erősebb választás.
+
 ------------------------------------------------------------------------
 
 ### 10. fázis — IP spoofing → IP Source Guard
