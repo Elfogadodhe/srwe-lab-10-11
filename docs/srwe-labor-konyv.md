@@ -448,6 +448,7 @@ S1:
     - ip default-gateway 10.0.99.254
     - ip domain-name lab.local
     - crypto key generate rsa modulus 1024
+    - enable secret cisco123
     - username admin privilege 15 secret cisco123
     - line vty 0 4
     - transport input telnet ssh
@@ -490,6 +491,7 @@ S2:
     - ip default-gateway 10.0.99.254
     - ip domain-name lab.local
     - crypto key generate rsa modulus 1024
+    - enable secret cisco123
     - username admin privilege 15 secret cisco123
     - line vty 0 4
     - transport input telnet ssh
@@ -1430,6 +1432,7 @@ enable
 configure terminal
 hostname R1
 ip domain-name lab.local
+enable secret cisco123
 username admin privilege 15 secret cisco123
 crypto key generate rsa modulus 2048
 interface GigabitEthernet 0/1
@@ -1451,6 +1454,7 @@ enable
 configure terminal
 hostname S1
 ip domain-name lab.local
+enable secret cisco123
 username admin privilege 15 secret cisco123
 crypto key generate rsa modulus 2048
 vlan 99
@@ -1477,6 +1481,7 @@ enable
 configure terminal
 hostname S2
 ip domain-name lab.local
+enable secret cisco123
 username admin privilege 15 secret cisco123
 crypto key generate rsa modulus 2048
 vlan 99

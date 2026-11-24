@@ -39,6 +39,8 @@ Már a repóban vannak, a helyükön:
 
 **Fontos:** A `configs/baseline.yml` VTY szekciójában a következő soroknak kell szerepelniük (sebezhető, de elérhető kiinduló állapot):
 ```yaml
+- enable secret cisco123
+- username admin privilege 15 secret cisco123
 - line vty 0 4
 - transport input telnet ssh
 - password ciscotelnet
