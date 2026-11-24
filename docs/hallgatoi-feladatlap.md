@@ -26,9 +26,9 @@ python push_config.py inventory.yml configs/baseline.yml
 
 | Eszköz | IP-cím | SSH-elérés (I/N) | Telnet-elérés (I/N) | Megjegyzés |
 |---|---|---|---|---|
-| S1 | 10.0.0.2 | _____ | _____ | ________ |
-| S2 | 10.0.0.3 | _____ | _____ | ________ |
-| R1 | 10.0.0.1 | _____ | _____ | ________ |
+| S1 | 10.0.99.1 | _____ | _____ | ________ |
+| S2 | 10.0.99.2 | _____ | _____ | ________ |
+| R1 | 10.0.99.254 | _____ | _____ | ________ |
 
 **Kérdés:** Miért nem kapcsolunk be a baseline-ban egyetlen védelmet sem?
 
@@ -272,7 +272,7 @@ _________________________________________________________________________
 
 ## Fázis 8 – CDP felderítés és Telnet
 
-**Felderítés:** `sudo python attacker/cdp_telnet_recon.py eth0 10.0.0.2`
+**Felderítés:** `sudo python attacker/cdp_telnet_recon.py eth0 10.0.99.1`
 
 **Kérdés:** Milyen információkat árult el a CDP a switchről? (Sorolj fel hármat!)
 
@@ -292,7 +292,7 @@ _________________________________________________________________________
 | SSH-verzió | _____ | _____ |
 | VTY-átvitel | _____ | _____ |
 
-**Telnet próba újra:** `telnet 10.0.0.2` — Sikerül-e csatlakozni? Miért?
+**Telnet próba újra:** `telnet 10.0.99.1` — Sikerül-e csatlakozni? Miért?
 
 ```
 _________________________________________________________________________

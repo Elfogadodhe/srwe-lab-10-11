@@ -1,19 +1,19 @@
 devices:
   S1:
     device_type: cisco_ios
-    host: 10.0.0.2
+    host: 10.0.99.1
     username: admin
     password: "cisco123"
     secret: "cisco123"
   S2:
     device_type: cisco_ios
-    host: 10.0.0.3
+    host: 10.0.99.2
     username: admin
     password: "cisco123"
     secret: "cisco123"
   R1:
     device_type: cisco_ios
-    host: 10.0.0.1
+    host: 10.0.99.254
     username: admin
     password: "cisco123"
     secret: "cisco123"

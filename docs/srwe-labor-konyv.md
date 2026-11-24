@@ -299,8 +299,8 @@ A listában látnod kell a `netmiko`, `PyYAML`, illetve `scapy` sorokat.
 
 ``` mermaid
 graph TD
-    subgraph VLAN99["Menedzsment &middot; VLAN 99 &middot; 10.0.0.0/8"]
-        PCA["PC-A: admin / netmiko<br/>NIC 10.0.0.10"]
+    subgraph VLAN99["Menedzsment &middot; VLAN 99 &middot; 10.0.99.0/8"]
+        PCA["PC-A: admin / netmiko<br/>NIC 10.0.99.10"]
     end
     subgraph VLAN10["User &middot; VLAN 10 &middot; 172.16.10.0/24"]
         PCV["PC-V: áldozat<br/>NIC DHCP .11-.254"]
@@ -309,9 +309,9 @@ graph TD
     subgraph VLAN20["Test &middot; VLAN 20 &middot; 172.16.20.0/24"]
         PCW["PC-W: double-tag cél<br/>NIC 172.16.20.0/24"]
     end
-    R1["R1: router-on-a-stick + DHCP<br/>Gi0/1.10 172.16.10.1<br/>Gi0/1.20 172.16.20.1<br/>Gi0/1.99 10.0.0.1 mgmt GW"]
-    S1["S1 switch<br/>SVI VLAN99 10.0.0.2"]
-    S2["S2 switch<br/>SVI VLAN99 10.0.0.3"]
+    R1["R1: router-on-a-stick + DHCP<br/>Gi0/1.10 172.16.10.1<br/>Gi0/1.20 172.16.20.1<br/>Gi0/1.99 10.0.99.254 mgmt GW"]
+    S1["S1 switch<br/>SVI VLAN99 10.0.99.1"]
+    S2["S2 switch<br/>SVI VLAN99 10.0.99.2"]
     R1 ===|"Gi0/1 trunk VLAN 10,20,99"| S1
     S1 ===|"Fa0/24 trunk VLAN 10,20,99"| S2
     PCV ---|"S1 Fa0/1 access VLAN 10"| S1
@@ -329,16 +329,16 @@ graph TD
 | **R1** | Gi0/1 | trunk (szülő) | — (nincs IP) | Router-on-a-stick trunk S1 felé |
 | **R1** | Gi0/1.10 | VLAN 10 (dot1Q) | `172.16.10.1/24` | VLAN 10 átjáró + DHCP-kiszolgáló |
 | **R1** | Gi0/1.20 | VLAN 20 (dot1Q) | `172.16.20.1/24` | VLAN 20 átjáró |
-| **R1** | Gi0/1.99 | VLAN 99 (dot1Q) | `10.0.0.1/8` | VLAN 99 átjáró = a switchek default-gateway-e (menedzsment) |
-| **S1** | SVI VLAN 99 | VLAN 99 | `10.0.0.2/8` | S1 menedzsment-IP (SSH / netmiko) |
+| **R1** | Gi0/1.99 | VLAN 99 (dot1Q) | `10.0.99.254/8` | VLAN 99 átjáró = a switchek default-gateway-e (menedzsment) |
+| **S1** | SVI VLAN 99 | VLAN 99 | `10.0.99.1/8` | S1 menedzsment-IP (SSH / netmiko) |
 | **S1** | Fa0/1 | VLAN 10 (access) | — | PC-V (áldozat) |
 | **S1** | Fa0/2 | VLAN 99 (access) | — | PC-A (admin / netmiko) |
 | **S1** | Fa0/3 | VLAN 10 (access) | — | ATTACKER (támadó) |
 | **S1** | Fa0/24 | trunk | — | Trunk S2 felé (VLAN 10,20,99) |
-| **S2** | SVI VLAN 99 | VLAN 99 | `10.0.0.3/8` | S2 menedzsment-IP (SSH / netmiko) |
+| **S2** | SVI VLAN 99 | VLAN 99 | `10.0.99.2/8` | S2 menedzsment-IP (SSH / netmiko) |
 | **S2** | Fa0/1 | VLAN 20 (access) | — | PC-W (double-tagging cél) |
 | **S2** | Fa0/24 | trunk | — | Trunk S1 felé (VLAN 10,20,99) |
-| **PC-A** | NIC | VLAN 99 | `10.0.0.10/8` (statikus) | Admin gép, netmiko-t futtat |
+| **PC-A** | NIC | VLAN 99 | `10.0.99.10/8` (statikus) | Admin gép, netmiko-t futtat |
 | **PC-V** | NIC | VLAN 10 | `172.16.10.0/24` (DHCP, `.11`–`.254`) | Áldozat |
 | **ATTACKER** | NIC | VLAN 10 | `172.16.10.0/24` | Támadó (scapy, root) |
 | **PC-W** | NIC | VLAN 20 | `172.16.20.0/24` | Double-tagging cél (9. fázis) |
@@ -349,7 +349,7 @@ graph TD
 |------------------|------------------|------------------|--------------------|
 | **10** | User (áldozat + támadó) | `172.16.10.0/24` | `172.16.10.1` (R1 Gi0/1.10)  |
 | **20** | Test (double-tag cél)   | `172.16.20.0/24` | `172.16.20.1` (R1 Gi0/1.20)  |
-| **99** | Menedzsment             | `10.0.0.0/8`  | `10.0.0.1` (R1 Gi0/1.99) |
+| **99** | Menedzsment             | `10.0.99.0/8`  | `10.0.99.254` (R1 Gi0/1.99) |
 
 > **DHCP:** a VLAN 10 pool (`USERS`) a `172.16.10.0/24` hálózatot osztja; a `172.16.10.1`–`172.16.10.10` tartomány kizárva (statikus/átjáró), így a PC-V a `.11`-től felfelé kap címet.
 
@@ -400,19 +400,19 @@ A három eszköz elérési adatai. A fájl **már a repóban van** — csak **í
 devices:
   S1:
     device_type: cisco_ios
-    host: 10.0.0.2
+    host: 10.0.99.1
     username: admin
     password: cisco123
     secret: cisco123
   S2:
     device_type: cisco_ios
-    host: 10.0.0.3
+    host: 10.0.99.2
     username: admin
     password: cisco123
     secret: cisco123
   R1:
     device_type: cisco_ios
-    host: 10.0.0.1
+    host: 10.0.99.254
     username: admin
     password: cisco123
     secret: cisco123
@@ -442,10 +442,10 @@ S1:
     - vlan 99
     - exit
     - interface vlan 99
-    - ip address 10.0.0.2 255.0.0.0
+    - ip address 10.0.99.1 255.0.0.0
     - no shutdown
     - exit
-    - ip default-gateway 10.0.0.1
+    - ip default-gateway 10.0.99.254
     - ip domain-name lab.local
     - crypto key generate rsa modulus 1024
     - username admin privilege 15 secret cisco123
@@ -484,10 +484,10 @@ S2:
     - vlan 99
     - exit
     - interface vlan 99
-    - ip address 10.0.0.3 255.0.0.0
+    - ip address 10.0.99.2 255.0.0.0
     - no shutdown
     - exit
-    - ip default-gateway 10.0.0.1
+    - ip default-gateway 10.0.99.254
     - ip domain-name lab.local
     - crypto key generate rsa modulus 1024
     - username admin privilege 15 secret cisco123
@@ -523,7 +523,7 @@ R1:
     - exit
     - interface GigabitEthernet0/1.99
     - encapsulation dot1Q 99
-    - ip address 10.0.0.1 255.0.0.0
+    - ip address 10.0.99.254 255.0.0.0
     - exit
     # NINCS 'no ip redirects' — az ICMP-redirect támadás (12. fázis) miatt
   dhcp_pool:
@@ -1223,7 +1223,7 @@ Mire használod: passzívan gyűjti a CDP-infót (platform, port, IOS-verzió) �
 #!/usr/bin/env python3
 """CDP-üzenetek passzív lehallgatása (platform, port, IOS-verzió) + Telnet-próba.
 
-Futtatás: sudo python cdp_telnet_recon.py eth0 10.0.0.2
+Futtatás: sudo python cdp_telnet_recon.py eth0 10.0.99.1
 """
 import socket, sys
 from scapy.all import sniff, Ether
@@ -1436,7 +1436,7 @@ interface GigabitEthernet 0/1
  no shutdown
 interface GigabitEthernet 0/1.99
  encapsulation dot1Q 99
- ip address 10.0.0.1 255.0.0.0
+ ip address 10.0.99.254 255.0.0.0
  no shutdown
 exit
 line vty 0 4
@@ -1455,7 +1455,7 @@ username admin privilege 15 secret cisco123
 crypto key generate rsa modulus 2048
 vlan 99
 interface vlan 99
- ip address 10.0.0.2 255.0.0.0
+ ip address 10.0.99.1 255.0.0.0
  no shutdown
 interface FastEthernet 0/2
  switchport mode access
@@ -1481,7 +1481,7 @@ username admin privilege 15 secret cisco123
 crypto key generate rsa modulus 2048
 vlan 99
 interface vlan 99
- ip address 10.0.0.3 255.0.0.0
+ ip address 10.0.99.2 255.0.0.0
  no shutdown
 interface FastEthernet 0/24
  switchport mode trunk
@@ -1498,9 +1498,9 @@ write memory
 **20.2 — Elérhetőség ellenőrzése a PC-A-ról.** A PC-A terminálján (aktív venv-vel):
 
 ``` bash
-ping 10.0.0.2
-ping 10.0.0.3
-ping 10.0.0.1
+ping 10.0.99.1
+ping 10.0.99.2
+ping 10.0.99.254
 ```
 
 Ha mindhárom válaszol, mehet a feltöltés. Ha nem: lásd a 27. hibakeresési gyorslistát.
@@ -1516,7 +1516,7 @@ python push_config.py inventory.yml configs/baseline.yml
 **Elvárt eredmény:** S1, S2, R1 elérhető SSH-n ÉS Telneten, egyetlen védelem sincs aktív. Gyors ellenőrzés:
 
 ``` bash
-ssh admin@10.0.0.2
+ssh admin@10.0.99.1
 ```
 
 majd az eszközön:
@@ -1709,7 +1709,7 @@ python push_config.py inventory.yml configs/mitigations.yml vlan-hop
 **(1) Támadás** (ATTACKER):
 
 ``` bash
-sudo python attacker/cdp_telnet_recon.py eth0 10.0.0.2
+sudo python attacker/cdp_telnet_recon.py eth0 10.0.99.1
 ```
 
 **(2) Megfigyelés:** a CDP-ben látszik az IOS-verzió, és a Telnet nyitva van (titkosítatlan bejelentkezés).\

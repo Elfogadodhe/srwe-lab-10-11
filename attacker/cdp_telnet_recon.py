@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """CDP-üzenetek passzív lehallgatása (platform, port, IOS-verzió) + Telnet-próba.
 
-Futtatás: sudo python cdp_telnet_recon.py eth0 10.0.0.2
+Futtatás: sudo python cdp_telnet_recon.py eth0 10.0.99.1
 """
 import socket, sys
 from scapy.all import sniff, Ether

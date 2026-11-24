@@ -46,7 +46,7 @@ Az R1 IOS-a csak SHA-1 alapú kulcscsere-algoritmusokat ajánl (`diffie-hellman-
 2. **Rendszer-ssh (macOS/Linux):** a beépített OpenSSH alapból visszautasítja a SHA-1 kex-et. Adj hozzá a `~/.ssh/config`-hoz:
 
 ```
-Host 10.0.0.1
+Host 10.0.99.254
   KexAlgorithms +diffie-hellman-group14-sha1,diffie-hellman-group1-sha1,diffie-hellman-group-exchange-sha1
   HostKeyAlgorithms +ssh-rsa
   PubkeyAcceptedAlgorithms +ssh-rsa

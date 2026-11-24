@@ -57,7 +57,7 @@ pip install netmiko pyyaml scapy
 # Először csak egy eszközre (S1)
 python push_config.py inventory.yml configs/baseline.yml S1-only
 # Ellenőrzés
-ssh admin@10.0.0.2
+ssh admin@10.0.99.1
 # show running-config | section line vty
 # "transport input telnet ssh" kell látszódjon
 ```
@@ -149,7 +149,7 @@ ssh admin@10.0.0.2
 - [ ] Fizikai eszközök összeállítása (2× switch, 1× router, 3× PC)
 - [ ] Topológia bekötve (S1–S2 trunk, PC-V, PC-A, ATTACKER)
 - [ ] R1-en DHCP pool konfigurálva (VLAN 10, 172.16.10.0/24)
-- [ ] PC-A (admin) IP-cím: 10.0.0.10/8, SSH elérhető
+- [ ] PC-A (admin) IP-cím: 10.0.99.10/8, SSH elérhető
 - [ ] ATTACKER (Kali/Debian) root jog, scapy telepítve
 - [ ] **baseline.yml** feltöltve (Telnet nyitva — sebezhető kiinduló állapot)
 - [ ] `verify.py` futási teszt (legalább S1-en)

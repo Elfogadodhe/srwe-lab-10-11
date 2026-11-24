@@ -1,6 +1,6 @@
 # AI-Instrukció: SRWE M10–11 Laborfeladat Automatizált Előállítása
 
-*Dokumentum-verzió: v3.2 | Utolsó frissítés: 2026-11-19*
+*Dokumentum-verzió: v3.1 | Utolsó frissítés: 2026-11-19*
 
 ## RÉSZ 0 — KIEGÉSZÍTŐ TÁMADÁSI JAVASLATOK (bővítési roadmap)
 
@@ -241,15 +241,13 @@ srwe-lab/
 
 ---
 
-*Dokumentum-verzió: v3.2 | Utolsó frissítés: 2026-11-19*
+*Dokumentum-verzió: v3.1 | Utolsó frissítés: 2026-11-19*
 
 ---
 
 ## VÁLTOZÁSNAPLÓ
 
 > Munkamenetre vonatkozó változásnapló. Minden módosítás timestamp-pel (ÉÉÉÉ-HH-NN).
-
-- **2026-11-19 (v3.2):** **Management hálózat átspirályosítva a 10.0.0.0/8 tetejére.** Az R1 menedzsment-IP-je `10.0.99.254` → **`10.0.0.1`** (Gi0/1.99), a management VLAN 99 hálózata `10.0.99.0/8` → **`10.0.0.0/8`**. A management hostok is logikus sorrendbe kerültek: S1 SVI `10.0.0.2`, S2 SVI `10.0.0.3`, PC-A (admin) `10.0.0.10` statikus. Frissítve: `configs/baseline.yml` (S1/S2 SVI, default-gateway-ek, R1 Gi0/1.99), `inventory.yml` (host címek), `README.md` (SSH-kompatibilitási `~/.ssh/config` blokk hoszt címe), `docs/srwe-labor-konyv.md` (§12 Mermaid-ábra, IP-táblázatok, beágyazott inventory/baseline/parancsmásolatok, ping/ssh parancsok), `docs/hallgatoi-feladatlap.md` (eszköztábla, felderítési/telnet parancsok), `docs/index-es-deploy-checklist.md` (ssh próba, PC-A checklist-sor), `attacker/cdp_telnet_recon.py` (példaparancs). A verify.py IP-semleges regexei érintetlenek. Élő eszközön: a `~/.ssh/config` bejegyzés host címét frissítsd `Host 10.0.0.1`-re, és az R1 gi0/1.99 címét manuálisan is át kell állítani (`ip address 10.0.0.1 255.0.0.0`), mielőtt a baseline push újra fut. Instrukció v3.2-re frissítve.
 
 - **2026-11-19 (v3.1):** **Címzési terv átdolgozva — vegyes címzés.** A VLAN 99 (menedzsment) /8-as címzése marad a könnyű konfigurációért (`10.0.99.0/8`, PC-A címe változatlan); a VLAN 10 és VLAN 20 user alhálózatai a `172.16.0.0/12` tartomány /24-es alhálózataira térnek át. Új címzés: VLAN 10 = `172.16.10.0/24` (GW `172.16.10.1`, PC-V DHCP `.11`–`.254`, ATTACKER statikus `.66`), VLAN 20 = `172.16.20.0/24` (GW `172.16.20.1`, PC-W `.10`). Frissítve: `configs/baseline.yml` (Gi0/1.10/.20 IP + DHCP-pool), `inventory.yml` (`user_subnet`, `legit_gateway`, `legit_dhcp`), mind a 7 érintett `attacker/` szkript alapértéke és példaparancsa (arp_spoof, icmp_redirect, ip_spoof, mac_flood, mac_spoof, rogue_dhcp, vlan_double_tag), a könyv §12 Mermaid-ábrája + IP-táblázatai + DHCP-megjegyzése + beágyazott szkript-másolatai, a hallgatói feladatlap támadási parancsai és a deploy-checklist. A SSH-fix és a verify.py (IP-semleges regexek) nem változott. Instrukció v3.1-re frissítve.
 
